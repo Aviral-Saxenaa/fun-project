@@ -607,7 +607,8 @@ export const db = {
       // Find top reported category
       let topCat = "Ghosting";
       let maxCatCount = 0;
-      for (const [cat, count] of Object.entries(s.categories)) {
+      for (const [cat, rawCount] of Object.entries(s.categories)) {
+        const count = Number(rawCount) || 0;
         if (count > maxCatCount) {
           maxCatCount = count;
           topCat = cat;
@@ -805,8 +806,8 @@ export const db = {
       ).length;
       const userVote = hashed
         ? store.votes.find(
-            (v) => v.experience_id === exp.id && v.anonymous_id_hash === hashed
-          )?.vote_type || null
+          (v) => v.experience_id === exp.id && v.anonymous_id_hash === hashed
+        )?.vote_type || null
         : null;
 
       // Base vote boost for seeds to look relatable and funny
@@ -922,8 +923,8 @@ export const db = {
       ).length;
       const userVote = hashed
         ? store.commentVotes.find(
-            (v) => v.comment_id === c.id && v.anonymous_id_hash === hashed
-          )?.vote_type || null
+          (v) => v.comment_id === c.id && v.anonymous_id_hash === hashed
+        )?.vote_type || null
         : null;
 
       return {
