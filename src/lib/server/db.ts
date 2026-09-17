@@ -8,6 +8,9 @@ export interface CompanyRecord {
   name: string;
   slug: string;
   website?: string;
+  domain?: string;
+  logo_url?: string;
+  meme_punchline?: string;
   industry?: string;
   created_at: string;
 }
@@ -82,188 +85,85 @@ function getStore(): Store {
 }
 
 function seedInitialData(): Store {
-  const c1 = {
-    id: "c-acme",
-    name: "Acme Corp",
-    slug: "acme-corp",
-    website: "https://acme.example.com",
-    industry: "Enterprise Software",
-    created_at: new Date(Date.now() - 90 * 86400000).toISOString(),
-  };
-  const c2 = {
-    id: "c-globex",
-    name: "Globex",
-    slug: "globex",
-    website: "https://globex.example.com",
-    industry: "Heavy Tech & Defense",
-    created_at: new Date(Date.now() - 80 * 86400000).toISOString(),
-  };
-  const c3 = {
-    id: "c-initech",
-    name: "Initech",
-    slug: "initech",
-    website: "https://initech.example.com",
-    industry: "Financial Services",
-    created_at: new Date(Date.now() - 75 * 86400000).toISOString(),
-  };
-  const c4 = {
+  const c1: CompanyRecord = {
     id: "c-google",
     name: "Google",
     slug: "google",
     website: "https://google.com",
-    industry: "Big Tech / Search",
-    created_at: new Date(Date.now() - 70 * 86400000).toISOString(),
+    domain: "google.com",
+    logo_url: "https://unavatar.io/google.com",
+    industry: "Big Tech & Search",
+    meme_punchline: "Ghosted more candidates than my toxic ex ghosted my texts 👻",
+    created_at: new Date(Date.now() - 90 * 86400000).toISOString(),
   };
-  const c5 = {
+  const c2: CompanyRecord = {
     id: "c-amazon",
     name: "Amazon",
     slug: "amazon",
     website: "https://amazon.com",
-    industry: "E-Commerce & Cloud",
+    domain: "amazon.com",
+    logo_url: "https://unavatar.io/amazon.com",
+    industry: "Cloud Computing & E-Commerce",
+    meme_punchline: "Completed 6 rounds of interviews just to become Casper the Friendly Ghost 🪦",
+    created_at: new Date(Date.now() - 85 * 86400000).toISOString(),
+  };
+  const c3: CompanyRecord = {
+    id: "c-meta",
+    name: "Meta",
+    slug: "meta",
+    website: "https://meta.com",
+    domain: "meta.com",
+    logo_url: "https://unavatar.io/meta.com",
+    industry: "Social Media & AI",
+    meme_punchline: "Faster at hiring AI than sending 1 automated rejection email 🤖",
+    created_at: new Date(Date.now() - 80 * 86400000).toISOString(),
+  };
+  const c4: CompanyRecord = {
+    id: "c-netflix",
+    name: "Netflix",
+    slug: "netflix",
+    website: "https://netflix.com",
+    domain: "netflix.com",
+    logo_url: "https://unavatar.io/netflix.com",
+    industry: "Streaming & Entertainment",
+    meme_punchline: "Are you still watching? Because the recruiter stopped responding 🍿",
+    created_at: new Date(Date.now() - 75 * 86400000).toISOString(),
+  };
+  const c5: CompanyRecord = {
+    id: "c-microsoft",
+    name: "Microsoft",
+    slug: "microsoft",
+    website: "https://microsoft.com",
+    domain: "microsoft.com",
+    logo_url: "https://unavatar.io/microsoft.com",
+    industry: "Enterprise Software & Cloud",
+    meme_punchline: "Blue screen of death on candidate communications 💻",
+    created_at: new Date(Date.now() - 70 * 86400000).toISOString(),
+  };
+  const c6: CompanyRecord = {
+    id: "c-uber",
+    name: "Uber",
+    slug: "uber",
+    website: "https://uber.com",
+    domain: "uber.com",
+    logo_url: "https://unavatar.io/uber.com",
+    industry: "Ride Sharing & Logistics",
+    meme_punchline: "Your recruiter has cancelled this trip 🚗💨",
     created_at: new Date(Date.now() - 65 * 86400000).toISOString(),
   };
-  const c6 = {
-    id: "c-meta",
-    name: "MetaCorp Labs",
-    slug: "metacorp-labs",
-    website: "https://meta.example.com",
-    industry: "Social Media & VR",
-    created_at: new Date(Date.now() - 60 * 86400000).toISOString(),
-  };
-  const c7 = {
-    id: "c-startup-xyz",
-    name: "Startup XYZ",
-    slug: "startup-xyz",
-    website: "https://startupxyz.example.com",
-    industry: "AI & Stealth",
-    created_at: new Date(Date.now() - 40 * 86400000).toISOString(),
-  };
-  const c8 = {
-    id: "c-infosys",
-    name: "Infosys",
-    slug: "infosys",
-    website: "https://infosys.com",
-    industry: "IT & Consulting",
-    created_at: new Date(Date.now() - 35 * 86400000).toISOString(),
-  };
-  const c9 = {
-    id: "c-tcs",
-    name: "TCS",
-    slug: "tcs",
-    website: "https://tcs.com",
-    industry: "IT Services",
-    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-  };
 
-  const companies: CompanyRecord[] = [c1, c2, c3, c4, c5, c6, c7, c8, c9];
+  const companies: CompanyRecord[] = [c1, c2, c3, c4, c5, c6];
 
   const experiences: ExperienceRecord[] = [
-    {
-      id: "exp-acme-1",
-      company_id: c1.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-1"),
-      interview_stage: "Final Round",
-      outcome: "Ghosted",
-      content:
-        "Had 4 interviews and a take-home assignment. The Director of Product said they would get back to me Monday morning with the final package details. It is currently September. I sent two polite follow-ups, and my recruiter apparently vaporized into thin air.",
-      waiting_days: 140,
-      interview_rounds: 4,
-      category: "Ghosting",
-      created_at: new Date(Date.now() - 22 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "exp-acme-2",
-      company_id: c1.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-2"),
-      interview_stage: "Offer Stage",
-      outcome: "Ghosted",
-      content:
-        "Recruiter verbally offered the position on a Friday 5 PM call. Said 'Look out for the DocuSign within 2 hours'. No DocuSign ever arrived. Reached out next week, recruiter's LinkedIn suddenly changed to 'Open to Work'. Company never assigned anyone else to complete the hire.",
-      waiting_days: 95,
-      interview_rounds: 6,
-      category: "HR Circus",
-      created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "exp-acme-3",
-      company_id: c1.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-3"),
-      interview_stage: "Technical",
-      outcome: "Still Waiting",
-      content:
-        "Spent a full Saturday coding a 12-hour microservice take-home project with complete unit test coverage. Interviewer said 'We are thoroughly reviewing all submissions'. That was 4 months ago. Still waiting for this legendary review.",
-      waiting_days: 120,
-      interview_rounds: 2,
-      category: "Unpaid Assignment",
-      created_at: new Date(Date.now() - 12 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "exp-globex-1",
-      company_id: c2.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-4"),
-      interview_stage: "Final Round",
-      outcome: "Ghosted",
-      content:
-        "5 rounds of interviews, including presenting a 45-minute slide deck to 8 senior engineers. The hiring manager smiled and said 'You blew us away!'. Never heard another syllable from Globex. Not even an automated rejection email.",
-      waiting_days: 85,
-      interview_rounds: 5,
-      category: "Ghosting",
-      created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "exp-globex-2",
-      company_id: c2.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-5"),
-      interview_stage: "Manager",
-      outcome: "Ghosted",
-      content:
-        "Manager rescheduled the interview 3 times. When we finally met, he was driving a car during the Zoom call. Promised feedback 'by tomorrow afternoon'. That was 60 days ago. The car has probably circumnavigated the globe by now.",
-      waiting_days: 60,
-      interview_rounds: 3,
-      category: "HR Circus",
-      created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "exp-initech-1",
-      company_id: c3.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-6"),
-      interview_stage: "HR",
-      outcome: "Ghosted",
-      content:
-        "Recruiter sent a Calendly invite, I booked a slot, and waited in the Teams lobby for 35 minutes. Sent an email asking if they needed to reschedule. Zero reply. They ghosted the first 15-minute phone screen!",
-      waiting_days: 45,
-      interview_rounds: 1,
-      category: "HR Circus",
-      created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "exp-initech-2",
-      company_id: c3.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-7"),
-      interview_stage: "Technical",
-      outcome: "Still Waiting",
-      content:
-        "Did a LeetCode hard live coding problem, interviewer didn't speak a single word except 'begin' and 'time is up'. Followed up 3 times over 2 months. Automated reply every time: 'We are evaluating candidates'.",
-      waiting_days: 75,
-      interview_rounds: 2,
-      category: "Zombie Interview",
-      created_at: new Date(Date.now() - 9 * 86400000).toISOString(),
-      status: "active",
-    },
+    // --- GOOGLE EXPERIENCES (#1 Most Reported & Longest Waiting) ---
     {
       id: "exp-google-1",
-      company_id: c4.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-8"),
+      company_id: c1.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-g1"),
       interview_stage: "Offer Stage",
       outcome: "Still Waiting",
       content:
-        "Passed hiring committee! Recruiter said 'Now we just need team matching, typically takes 1-2 weeks'. It has been 11 months. I have changed jobs, moved cities, and adopted a golden retriever. I still check my spam folder every Wednesday.",
+        "Passed Google Hiring Committee with L5 recommendation! Recruiter sent email: 'Now we just need team matching, typically takes 1-2 weeks'. It has been 335 days. I have changed jobs, moved cities, and adopted a golden retriever. I still check my spam folder every single Wednesday.",
       waiting_days: 335,
       interview_rounds: 7,
       category: "Infinite Waiting",
@@ -272,12 +172,12 @@ function seedInitialData(): Store {
     },
     {
       id: "exp-google-2",
-      company_id: c4.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-9"),
+      company_id: c1.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-g2"),
       interview_stage: "Final Round",
-      outcome: "Ghosted",
+      outcome: "Ghosted After Final Round",
       content:
-        "Finished the full on-site loop (5 back-to-back 45-minute interviews). Recruiter sent an email saying 'Gathering feedback, will sync with you on Tuesday'. Tuesday was 3 months ago. Rejection emails are apparently not in Google's cloud computing budget.",
+        "Finished the full on-site loop (5 back-to-back 45-minute technical interviews). Recruiter sent an email saying 'Gathering feedback from committee, will sync with you on Tuesday'. Tuesday was 3 months ago. Rejection emails are apparently not covered in Google's cloud computing budget.",
       waiting_days: 90,
       interview_rounds: 5,
       category: "Ghosting",
@@ -285,27 +185,101 @@ function seedInitialData(): Store {
       status: "active",
     },
     {
-      id: "exp-amazon-1",
-      company_id: c5.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-10"),
-      interview_stage: "Final Round",
-      outcome: "Ghosted",
+      id: "exp-google-3",
+      company_id: c1.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-g3"),
+      interview_stage: "Technical",
+      outcome: "Never Responded",
       content:
-        "Bar raiser interview asked 14 behavioral leadership principle questions. At the end, interviewer said 'You demonstrate extreme ownership'. Ironically, they demonstrated zero ownership when it came to sending any rejection or update. Complete radio silence.",
+        "Completed 2 coding screens with 100% optimal Big-O solutions. Interviewer said 'Great job, expect recruiter to schedule system design'. Recruiter disappeared from Earth. Automated status portal stuck on 'Submitted' forever.",
+      waiting_days: 64,
+      interview_rounds: 3,
+      category: "Zombie Interview",
+      created_at: new Date(Date.now() - 6 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "exp-google-4",
+      company_id: c1.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-g4"),
+      interview_stage: "Applied",
+      outcome: "Ghost Job / Fake Listing",
+      content:
+        "Found the exact same Senior Staff Software Engineer role reposted on LinkedIn every 2 weeks for 14 straight months. Applied 8 months ago, never a single human ping. Ghost job requisition to show fake growth.",
+      waiting_days: 240,
+      interview_rounds: 0,
+      category: "Red Flag",
+      created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+      status: "active",
+    },
+
+    // --- AMAZON EXPERIENCES (#1 Most Ghosted / Cold-Blooded) ---
+    {
+      id: "exp-amazon-1",
+      company_id: c2.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-a1"),
+      interview_stage: "Final Round",
+      outcome: "Ghosted After Final Round",
+      content:
+        "Bar raiser interview asked 14 behavioral leadership principle questions. At the end, the interviewer said 'You demonstrate extreme Ownership and Bias for Action'. Ironically, they demonstrated zero ownership when it came to sending any rejection or update. Complete radio silence.",
       waiting_days: 80,
-      interview_rounds: 5,
+      interview_rounds: 6,
       category: "Ghosting",
       created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
       status: "active",
     },
     {
+      id: "exp-amazon-2",
+      company_id: c2.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-a2"),
+      interview_stage: "HR",
+      outcome: "Ghosted",
+      content:
+        "Recruiter sent urgent calendar invite for AWS position. Waited in Chime lobby for 45 minutes. Interviewer never showed up. Emailed recruiter twice, zero response. Sent connection on LinkedIn, immediately declined.",
+      waiting_days: 52,
+      interview_rounds: 1,
+      category: "HR Circus",
+      created_at: new Date(Date.now() - 14 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "exp-amazon-3",
+      company_id: c2.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-a3"),
+      interview_stage: "Technical",
+      outcome: "Still Waiting",
+      content:
+        "Completed Amazon Online Assessment (OA2) with all test cases passing and optimal memory. The candidate portal has stated 'Under Consideration' for 98 days straight. Has my resume been archived to S3 Glacier Deep Archive?",
+      waiting_days: 98,
+      interview_rounds: 2,
+      category: "Infinite Waiting",
+      created_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "exp-amazon-4",
+      company_id: c2.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-a4"),
+      interview_stage: "Final Round",
+      outcome: "Ghosted",
+      content:
+        "Full 5-round loop completed for Senior TPM. Promised 2-and-5 SLA response within 5 business days. Day 67 now. Sent follow up to 3 different recruiters, every email bounced or was ignored.",
+      waiting_days: 67,
+      interview_rounds: 5,
+      category: "Ghosting",
+      created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
+      status: "active",
+    },
+
+    // --- META EXPERIENCES (#1 Trending & Rising Velocity) ---
+    {
       id: "exp-meta-1",
-      company_id: c6.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-11"),
+      company_id: c3.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-m1"),
       interview_stage: "Technical",
       outcome: "Ghosted",
       content:
-        "Was told by the recruiter 'We love your profile, engineers gave rave reviews'. Scheduled a salary expectation call, recruiter ghosted the call. Emailed them twice, both bounced because recruiter was laid off.",
+        "Passed Meta E5 coding round with flying colors. Recruiter booked salary negotiation sync. Day of call, recruiter was laid off in the morning restructure. Nobody took over the candidate pipeline. Vanished into the Metaverse.",
       waiting_days: 105,
       interview_rounds: 4,
       category: "HR Circus",
@@ -313,92 +287,115 @@ function seedInitialData(): Store {
       status: "active",
     },
     {
-      id: "exp-startup-1",
-      company_id: c7.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-12"),
+      id: "exp-meta-2",
+      company_id: c3.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-m2"),
       interview_stage: "Final Round",
-      outcome: "Ghosted",
+      outcome: "Ghosted After Final Round",
       content:
-        "Founder pitched me their revolutionary AI token startup for an hour, asked me to review their codebase and find 3 security vulnerabilities as a 'fun test'. I found them, sent the patch, and was immediately blocked on Twitter and Discord.",
-      waiting_days: 50,
-      interview_rounds: 3,
-      category: "Red Flag",
-      created_at: new Date(Date.now() - 4 * 86400000).toISOString(),
+        "Completed 4 virtual on-site rounds for AI Infrastructure. Recruiter said 'Feedback is extremely strong, committee meets Thursday'. Thursday came and went 72 days ago. Left on read on WhatsApp and email.",
+      waiting_days: 72,
+      interview_rounds: 5,
+      category: "Ghosting",
+      created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
       status: "active",
     },
     {
-      id: "exp-infosys-1",
-      company_id: c8.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-13"),
-      interview_stage: "Applied",
+      id: "exp-meta-3",
+      company_id: c3.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-m3"),
+      interview_stage: "Manager",
       outcome: "Still Waiting",
       content:
-        "Applied in college 3 years ago. Received an automated email last night asking if I am still interested in an entry level trainee position. Time is a flat circle.",
-      waiting_days: 300,
-      interview_rounds: 1,
-      category: "Infinite Waiting",
+        "Hiring manager reached out directly on LinkedIn claiming 'Your profile is perfect for my team'. Interview went for an hour, agreed to next steps. Then ghosted completely. Profile still says 'Hiring' on LinkedIn.",
+      waiting_days: 48,
+      interview_rounds: 2,
+      category: "Zombie Interview",
       created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
       status: "active",
     },
+
+    // --- NETFLIX & MICROSOFT & UBER EXPERIENCES ---
     {
-      id: "exp-tcs-1",
-      company_id: c9.id,
-      anonymous_id_hash: hashAnonymousId("seed-user-14"),
-      interview_stage: "HR",
+      id: "exp-netflix-1",
+      company_id: c4.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-n1"),
+      interview_stage: "Final Round",
+      outcome: "Ghosted After Final Round",
+      content:
+        "Culture memo interview was intense. Recruiter promised top-of-market feedback within 48 hours. It's been 54 days. Guess my subscription to their talent pool was canceled.",
+      waiting_days: 54,
+      interview_rounds: 4,
+      category: "Ghosting",
+      created_at: new Date(Date.now() - 16 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "exp-msft-1",
+      company_id: c5.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-ms1"),
+      interview_stage: "Technical",
+      outcome: "Still Waiting",
+      content:
+        "Did 3 rounds of Azure systems architecture. Recruiter said 'Hold tight while we realign headcount for fiscal Q3'. That was 140 days ago. Headcount is still apparently in orbit.",
+      waiting_days: 140,
+      interview_rounds: 3,
+      category: "Infinite Waiting",
+      created_at: new Date(Date.now() - 12 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "exp-uber-1",
+      company_id: c6.id,
+      anonymous_id_hash: hashAnonymousId("seed-user-u1"),
+      interview_stage: "Final Round",
       outcome: "Ghosted",
       content:
-        "Cleared all rounds, received offer letter with joining date. Reported to the office, security said they have no record of my department. Called HR, phone switched off. Left after 4 hours.",
-      waiting_days: 65,
-      interview_rounds: 3,
-      category: "HR Circus",
-      created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+        "Spent 4 hours on algorithmic routing problems. The hiring manager said 'We need someone like you tomorrow'. Tomorrow never came. Recruiter cancelled the candidate ride with 0 stars.",
+      waiting_days: 62,
+      interview_rounds: 4,
+      category: "Ghosting",
+      created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
       status: "active",
     },
   ];
 
   const votes: VoteRecord[] = [
-    { id: "v1", experience_id: "exp-acme-1", anonymous_id_hash: "u1", vote_type: "up" },
-    { id: "v2", experience_id: "exp-acme-1", anonymous_id_hash: "u2", vote_type: "up" },
-    { id: "v3", experience_id: "exp-acme-1", anonymous_id_hash: "u3", vote_type: "up" },
-    { id: "v4", experience_id: "exp-acme-1", anonymous_id_hash: "u4", vote_type: "up" },
-    { id: "v5", experience_id: "exp-google-1", anonymous_id_hash: "u5", vote_type: "up" },
-    { id: "v6", experience_id: "exp-google-1", anonymous_id_hash: "u6", vote_type: "up" },
-    { id: "v7", experience_id: "exp-google-1", anonymous_id_hash: "u7", vote_type: "up" },
-    { id: "v8", experience_id: "exp-startup-1", anonymous_id_hash: "u8", vote_type: "up" },
-    { id: "v9", experience_id: "exp-startup-1", anonymous_id_hash: "u9", vote_type: "up" },
+    { id: "v1", experience_id: "exp-google-1", anonymous_id_hash: "u1", vote_type: "up" },
+    { id: "v2", experience_id: "exp-google-1", anonymous_id_hash: "u2", vote_type: "up" },
+    { id: "v3", experience_id: "exp-google-1", anonymous_id_hash: "u3", vote_type: "up" },
+    { id: "v4", experience_id: "exp-google-2", anonymous_id_hash: "u4", vote_type: "up" },
+    { id: "v5", experience_id: "exp-amazon-1", anonymous_id_hash: "u5", vote_type: "up" },
+    { id: "v6", experience_id: "exp-amazon-1", anonymous_id_hash: "u6", vote_type: "up" },
+    { id: "v7", experience_id: "exp-amazon-2", anonymous_id_hash: "u7", vote_type: "up" },
+    { id: "v8", experience_id: "exp-meta-1", anonymous_id_hash: "u8", vote_type: "up" },
+    { id: "v9", experience_id: "exp-meta-2", anonymous_id_hash: "u9", vote_type: "up" },
+    { id: "v10", experience_id: "exp-meta-1", anonymous_id_hash: "u10", vote_type: "up" },
   ];
 
   const comments: CommentRecord[] = [
     {
       id: "comm-1",
-      experience_id: "exp-acme-1",
-      anonymous_id_hash: hashAnonymousId("anon-comm-1"),
-      content: "Same exact thing happened to me at Acme! 4 rounds and absolute silence.",
-      created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "comm-2",
-      experience_id: "exp-acme-1",
-      anonymous_id_hash: hashAnonymousId("anon-comm-2"),
-      content: "4 rounds? Rookie numbers. I went through 7 at another firm before the recruiter vanished.",
-      created_at: new Date(Date.now() - 19 * 86400000).toISOString(),
-      status: "active",
-    },
-    {
-      id: "comm-3",
       experience_id: "exp-google-1",
-      anonymous_id_hash: hashAnonymousId("anon-comm-3"),
-      content: "11 months in team match is legendary! You deserve a medal and a trophy for patience.",
+      anonymous_id_hash: hashAnonymousId("anon-comm-1"),
+      content: "335 days in Google team match! You deserve an honorary L6 salary just for your patience.",
       created_at: new Date(Date.now() - 24 * 86400000).toISOString(),
       status: "active",
     },
     {
-      id: "comm-4",
-      experience_id: "exp-startup-1",
-      anonymous_id_hash: hashAnonymousId("anon-comm-4"),
-      content: "Classic 'consulting disguised as an interview'. Report their repo on GitHub next time.",
-      created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+      id: "comm-2",
+      experience_id: "exp-amazon-1",
+      anonymous_id_hash: hashAnonymousId("anon-comm-2"),
+      content: "Classic Amazon Bar Raiser move. Extreme ownership only applies until they have to type an email.",
+      created_at: new Date(Date.now() - 6 * 86400000).toISOString(),
+      status: "active",
+    },
+    {
+      id: "comm-3",
+      experience_id: "exp-meta-1",
+      anonymous_id_hash: hashAnonymousId("anon-comm-3"),
+      content: "Meta recruiters getting laid off while you are in the middle of negotiating is the ultimate 2024-2026 tech experience.",
+      created_at: new Date(Date.now() - 17 * 86400000).toISOString(),
       status: "active",
     },
   ];
@@ -530,6 +527,9 @@ export const db = {
         name: c.name,
         slug: c.slug,
         website: c.website,
+        domain: c.domain,
+        logo_url: c.logo_url,
+        meme_punchline: c.meme_punchline,
         industry: c.industry,
         created_at: c.created_at,
         ghost_score: score,
@@ -550,20 +550,38 @@ export const db = {
     return store.companies.find((c) => c.id === id) || null;
   },
 
-  createCompany(name: string, website?: string, industry?: string) {
+  createCompany(
+    name: string,
+    website?: string,
+    industry?: string,
+    logo_url?: string,
+    meme_punchline?: string
+  ) {
     const store = getStore();
     const cleanName = name.trim();
     const slug = generateSlug(cleanName);
     const existing = store.companies.find(
       (c) => c.slug === slug || c.name.toLowerCase() === cleanName.toLowerCase()
     );
-    if (existing) return existing;
+    if (existing) {
+      if (logo_url && !existing.logo_url) existing.logo_url = logo_url;
+      if (meme_punchline && !existing.meme_punchline) existing.meme_punchline = meme_punchline;
+      return existing;
+    }
+
+    const domain = website
+      ? website.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase()
+      : undefined;
 
     const newCompany: CompanyRecord = {
       id: "comp-" + Math.random().toString(36).substring(2, 9),
       name: cleanName,
       slug,
       website: website?.trim() || undefined,
+      domain,
+      logo_url: logo_url || (domain ? `https://unavatar.io/${domain}` : undefined),
+      meme_punchline:
+        meme_punchline || "This company ghosted more candidates than my toxic ex ghosted my texts 👻",
       industry: industry?.trim() || "Technology",
       created_at: new Date().toISOString(),
     };
@@ -596,17 +614,30 @@ export const db = {
         }
       }
 
-      // Dynamic pseudo rank changes based on company id hash for visual charm
-      const hashVal = c.name.split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-      const shifts: ("up" | "down" | "new" | "same")[] = ["up", "down", "same", "new"];
-      const rankChange = shifts[hashVal % 4];
-      const rankShift = (hashVal % 3) + 1;
+      // Dynamic curated shifts for realism across demo companies
+      let rankChange: "up" | "down" | "new" | "same" = "same";
+      let rankShift = 1;
+      if (c.slug === "meta") {
+        rankChange = "up";
+        rankShift = 4;
+      } else if (c.slug === "amazon") {
+        rankChange = "up";
+        rankShift = 2;
+      } else if (c.slug === "google") {
+        rankChange = "same";
+        rankShift = 0;
+      } else if (c.slug === "netflix") {
+        rankChange = "down";
+        rankShift = 1;
+      }
 
       board.push({
         id: c.id,
         name: c.name,
         slug: c.slug,
         industry: c.industry,
+        logo_url: c.logo_url,
+        meme_punchline: c.meme_punchline,
         ghost_score: score,
         ghost_label: getGhostLabel(score),
         ghost_emoji: getGhostEmoji(score),
@@ -623,8 +654,10 @@ export const db = {
       board.sort((a, b) => b.ghost_count - a.ghost_count || b.ghost_score - a.ghost_score);
     } else if (filter === "most_reported") {
       board.sort((a, b) => b.report_count - a.report_count || b.ghost_score - a.ghost_score);
-    } else if (filter === "trending" || filter === "rising") {
-      board.sort((a, b) => (b.ghost_score * b.report_count) - (a.ghost_score * a.report_count));
+    } else if (filter === "trending") {
+      board.sort((a, b) => (b.rank_shift || 0) - (a.rank_shift || 0) || b.ghost_score - a.ghost_score);
+    } else if (filter === "rising") {
+      board.sort((a, b) => b.avg_waiting_days - a.avg_waiting_days || b.ghost_score - a.ghost_score);
     } else {
       // Overall default: Highest ghost score
       board.sort((a, b) => b.ghost_score - a.ghost_score || b.report_count - a.report_count);

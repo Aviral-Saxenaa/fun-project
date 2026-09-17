@@ -206,7 +206,18 @@ export default function LeaderboardPage() {
 
                   {/* Details */}
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                      {item.logo_url ? (
+                        <img
+                          src={item.logo_url}
+                          alt=""
+                          className="w-7 h-7 rounded-lg bg-zinc-900 object-contain p-0.5 border border-zinc-700 shrink-0"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : null}
+
                       <span className="font-bold text-base sm:text-lg text-white group-hover:text-purple-300 transition-colors">
                         {item.name}
                       </span>
@@ -216,6 +227,12 @@ export default function LeaderboardPage() {
                         </span>
                       )}
                     </div>
+
+                    {item.meme_punchline && (
+                      <div className="text-xs text-purple-300/80 italic line-clamp-1">
+                        &ldquo;{item.meme_punchline}&rdquo;
+                      </div>
+                    )}
 
                     <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
                       {item.industry && (

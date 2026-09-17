@@ -10,9 +10,9 @@ export type InterviewStage =
 export type InterviewOutcome =
   | "Ghosted"
   | "Still Waiting"
-  | "Rejected"
-  | "Got Offer"
-  | "Withdrew";
+  | "Never Responded"
+  | "Ghosted After Final Round"
+  | "Ghost Job / Fake Listing";
 
 export type ExperienceCategory =
   | "Ghosting"
@@ -42,6 +42,9 @@ export interface Company {
   name: string;
   slug: string;
   website?: string;
+  domain?: string;
+  logo_url?: string;
+  meme_punchline?: string;
   industry?: string;
   created_at: string;
   ghost_score: number;
@@ -66,6 +69,9 @@ export interface CompanyDetail {
     name: string;
     slug: string;
     website?: string;
+    domain?: string;
+    logo_url?: string;
+    meme_punchline?: string;
     industry?: string;
     created_at: string;
   };
@@ -113,6 +119,8 @@ export interface LeaderboardItem {
   name: string;
   slug: string;
   industry?: string;
+  logo_url?: string;
+  meme_punchline?: string;
   ghost_score: number;
   ghost_label: string;
   ghost_emoji: string;

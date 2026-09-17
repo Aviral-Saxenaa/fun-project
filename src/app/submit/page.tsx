@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Loader2,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import { AddCompanyModal } from "@/components/AddCompanyModal";
 
@@ -30,9 +31,9 @@ const STAGES: InterviewStage[] = [
 const OUTCOMES: { label: string; value: InterviewOutcome; emoji: string }[] = [
   { label: "Ghosted", value: "Ghosted", emoji: "👻" },
   { label: "Still Waiting", value: "Still Waiting", emoji: "⏳" },
-  { label: "Rejected", value: "Rejected", emoji: "❌" },
-  { label: "Got Offer", value: "Got Offer", emoji: "🎉" },
-  { label: "Withdrew", value: "Withdrew", emoji: "🏃" },
+  { label: "Never Responded", value: "Never Responded", emoji: "🪦" },
+  { label: "Ghosted After Final Round", value: "Ghosted After Final Round", emoji: "💀" },
+  { label: "Ghost Job / Fake Listing", value: "Ghost Job / Fake Listing", emoji: "🚩" },
 ];
 
 const CATEGORIES: { label: string; value: ExperienceCategory; emoji: string; desc: string }[] = [
@@ -67,6 +68,8 @@ function SubmitFormContent() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [polishing, setPolishing] = useState(false);
+  const [aiNote, setAiNote] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [createdSlug, setCreatedSlug] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +109,31 @@ function SubmitFormContent() {
     setCompanySearch("");
   };
 
+  const handleCivilizeWithAI = async () => {
+    if (!content.trim()) return;
+    setPolishing(true);
+    setAiNote(null);
+    try {
+      const res = await fetch("/api/gemini/civilize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: content,
+          companyName: selectedCompany?.name || companySearch || "The Company",
+        }),
+      });
+      const data = await res.json();
+      if (data.sanitized) {
+        setContent(data.sanitized);
+        setAiNote(data.explanation || "Transformed vulgarities/anger into sharp, witty corporate satire! ✨");
+      }
+    } catch (err) {
+      console.error("AI Polish error:", err);
+    } finally {
+      setPolishing(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyId) {
@@ -120,13 +148,36 @@ function SubmitFormContent() {
     setSubmitting(true);
     setError(null);
 
+    let finalContent = content.trim();
+
+    // Auto-civilize if aggressive or vulgar words detected
+    const vulgarTest = /\b(fuck|shit|bitch|bastard|asshole|cunt|dick|idiot|scam|motherfucker|moron|bullshit)\b/i;
+    if (vulgarTest.test(finalContent)) {
+      try {
+        const res = await fetch("/api/gemini/civilize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: finalContent,
+            companyName: selectedCompany?.name || companySearch || "The Company",
+          }),
+        });
+        const data = await res.json();
+        if (data.sanitized) {
+          finalContent = data.sanitized;
+        }
+      } catch (err) {
+        console.error("Auto civilize error:", err);
+      }
+    }
+
     try {
       await api.createExperience({
         company_id: companyId,
         interview_stage: stage,
         outcome,
         category,
-        content: content.trim(),
+        content: finalContent,
         waiting_days: waitingDays ? parseInt(waitingDays) : null,
         interview_rounds: interviewRounds ? parseInt(interviewRounds) : null,
       });
@@ -402,9 +453,22 @@ function SubmitFormContent() {
 
         {/* Story Textarea */}
         <div className="space-y-1.5">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
-            What happened? *
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
+              What happened? *
+            </label>
+            <button
+              type="button"
+              onClick={handleCivilizeWithAI}
+              disabled={polishing || !content.trim()}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+              title="Transform spicy rants and vulgar language into witty corporate satire"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>{polishing ? "Polishing into satire..." : "✨ AI De-Vulgarize & Polish"}</span>
+            </button>
+          </div>
+
           <textarea
             id="experience-content-textarea"
             rows={5}
@@ -414,6 +478,16 @@ function SubmitFormContent() {
             placeholder="Had 4 interviews and a take-home assignment. They said they'd get back to me Monday morning. It is currently September..."
             className="w-full p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-all leading-relaxed"
           />
+
+          {aiNote && (
+            <div className="p-2.5 bg-purple-950/40 border border-purple-500/30 rounded-xl text-xs text-purple-200 flex items-center gap-2">
+              <span>✨</span>
+              <span>{aiNote}</span>
+            </div>
+          )}
+          <p className="text-[11px] text-zinc-500 italic">
+            Tip: Keep it witty. Our AI automatically converts harsh profanity or spicy anger into hilarious corporate satire.
+          </p>
         </div>
 
         {error && (

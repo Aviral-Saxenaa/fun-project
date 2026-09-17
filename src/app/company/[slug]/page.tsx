@@ -125,9 +125,27 @@ export default function CompanyDetailPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           {/* Company Title & Info */}
           <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white flex items-center gap-3">
-              <span>{company.name}</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              {company.logo_url ? (
+                <img
+                  src={company.logo_url}
+                  alt=""
+                  className="w-10 h-10 rounded-xl bg-zinc-950 p-1 border border-zinc-700 object-contain shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = "none";
+                  }}
+                />
+              ) : null}
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white flex items-center gap-3">
+                <span>{company.name}</span>
+              </h1>
+            </div>
+
+            {company.meme_punchline && (
+              <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-xs sm:text-sm font-medium text-purple-200 italic max-w-xl">
+                &ldquo;{company.meme_punchline}&rdquo; 👻
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-zinc-400">
               {company.industry && (

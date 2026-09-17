@@ -7,6 +7,8 @@ import { Experience, LeaderboardItem, PlatformStats, ExperienceCategory } from "
 import { SearchBar } from "@/components/SearchBar";
 import { ExperienceCard } from "@/components/ExperienceCard";
 import { GhostScoreBadge } from "@/components/GhostScoreBadge";
+import { GhostThreeCanvas } from "@/components/GhostThreeCanvas";
+import { MemeTicker } from "@/components/MemeTicker";
 import {
   Trophy,
   Plus,
@@ -74,32 +76,33 @@ export default function HomePage() {
 
   return (
     <div className="space-y-16 pb-16">
-      {/* Hero Section */}
-      <section className="relative pt-12 md:pt-20 pb-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
+      {/* Hero Section with 3D Three.js Ghost and Meme Ticker */}
+      <section className="relative pt-6 md:pt-12 pb-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
         {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
 
-        {/* Mascot */}
-        <div className="inline-flex items-center justify-center p-3 rounded-3xl bg-zinc-900/90 border border-purple-500/30 shadow-2xl shadow-purple-950/60 mb-6 group cursor-default">
-          <span className="text-5xl md:text-6xl animate-bounce duration-1000">👻</span>
+        {/* 3D Three.js Interactive Mascot Canvas */}
+        <div className="mb-4">
+          <GhostThreeCanvas />
         </div>
 
         {/* Title & Taglines */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white mb-4">
-          GHOSTED
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white mb-3">
+          GHOSTED 👻
         </h1>
 
         <p className="text-xl sm:text-2xl font-bold text-purple-300 max-w-2xl mx-auto mb-2">
           They interviewed. They promised. They vanished.
         </p>
 
-        <p className="text-sm sm:text-base text-zinc-400 italic max-w-xl mx-auto mb-8">
+        <p className="text-sm sm:text-base text-zinc-400 italic max-w-xl mx-auto mb-6">
           &ldquo;Because apparently rejection emails are a premium feature.&rdquo;
         </p>
 
-        <p className="text-sm text-zinc-400 mb-6 font-medium">
-          Search for a company and see what candidates really experienced.
-        </p>
+        {/* Meme Ticker: Catchy Quotes */}
+        <div className="mb-8">
+          <MemeTicker />
+        </div>
 
         {/* Search Bar - Centerpiece */}
         <div className="mb-6">
@@ -183,13 +186,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 🔥 Trending Ghosts Podium */}
+      {/* 🔥 Trending Ghosts Podium with Logos & Punchlines */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Flame className="w-6 h-6 text-orange-400 animate-pulse" />
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              🔥 Trending Ghosts
+              🔥 Trending Ghosts (Demo Showcase)
             </h2>
           </div>
           <Link
@@ -215,19 +218,37 @@ export default function HomePage() {
               <Link
                 key={comp.id}
                 href={`/company/${comp.slug}`}
-                className={`p-5 rounded-2xl border ${borderCol} hover:scale-[1.01] transition-all duration-200 group relative overflow-hidden shadow-lg`}
+                className={`p-5 rounded-2xl border ${borderCol} hover:scale-[1.01] transition-all duration-200 group relative overflow-hidden shadow-lg flex flex-col justify-between`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{medal}</span>
-                    <span className="font-bold text-base text-white group-hover:text-purple-300 transition-colors">
-                      {comp.name}
-                    </span>
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{medal}</span>
+                      {comp.logo_url ? (
+                        <img
+                          src={comp.logo_url}
+                          alt=""
+                          className="w-8 h-8 rounded-lg bg-zinc-900 object-contain p-0.5 border border-zinc-700"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : null}
+                      <span className="font-bold text-base text-white group-hover:text-purple-300 transition-colors">
+                        {comp.name}
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-zinc-400">#{idx + 1}</span>
                   </div>
-                  <span className="text-xs font-mono text-zinc-400">#{idx + 1}</span>
+
+                  {comp.meme_punchline && (
+                    <p className="text-xs text-purple-200/90 italic bg-purple-950/30 p-2 rounded-xl border border-purple-900/40 mb-3 line-clamp-2">
+                      &ldquo;{comp.meme_punchline}&rdquo;
+                    </p>
+                  )}
                 </div>
 
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-800/60">
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-800/60">
                   <div>
                     <div className="text-xs text-zinc-400 font-mono">
                       {comp.report_count} {comp.report_count === 1 ? "report" : "reports"}
@@ -255,7 +276,7 @@ export default function HomePage() {
               </span>
             </h2>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Read real recruiter horror stories, upvote, and comment without an account.
+              Strictly ghosting and vanished recruiter encounters. Upvote &amp; comment without an account.
             </p>
           </div>
 
@@ -342,3 +363,4 @@ export default function HomePage() {
     </div>
   );
 }
+
