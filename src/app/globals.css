@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+.font-devanagari {
+  font-family: 'Yatra One', 'Rozha One', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 @layer base {
   :root {
     --background: #090a0f;
