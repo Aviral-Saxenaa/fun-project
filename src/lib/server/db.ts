@@ -433,12 +433,19 @@ export const db = {
         rankShift = 1;
       }
 
+      const cLogo = c.logo_url
+        ? String(c.logo_url)
+        : c.domain
+        ? `https://unavatar.io/${String(c.domain)}`
+        : undefined;
+
       board.push({
         id: companyId,
         name: String(c.name),
         slug,
         industry: c.industry ? String(c.industry) : undefined,
-        logo_url: c.logo_url ? String(c.logo_url) : undefined,
+        logo_url: cLogo,
+        domain: c.domain ? String(c.domain) : undefined,
         meme_punchline: c.meme_punchline ? String(c.meme_punchline) : undefined,
         ghost_score: score,
         ghost_label: getGhostLabel(score),
@@ -609,6 +616,8 @@ export const db = {
         e.*, 
         c.name as company_name, 
         c.slug as company_slug,
+        c.logo_url as company_logo_url,
+        c.domain as company_domain,
         (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'up') as up_cnt,
         (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'down') as down_cnt,
         (SELECT COUNT(*) FROM comments cm WHERE cm.experience_id = e.id AND cm.status = 'active') as comm_cnt,
@@ -632,6 +641,8 @@ export const db = {
       company_id: String(r.company_id),
       company_name: r.company_name ? String(r.company_name) : "Unknown Company",
       company_slug: r.company_slug ? String(r.company_slug) : "",
+      company_logo_url: r.company_logo_url ? String(r.company_logo_url) : (r.company_domain ? `https://unavatar.io/${r.company_domain}` : undefined),
+      company_domain: r.company_domain ? String(r.company_domain) : undefined,
       anonymous_id_hash: String(r.anonymous_id_hash),
       author_handle: "Anonymous Candidate",
       interview_stage: String(r.interview_stage),
@@ -672,6 +683,8 @@ export const db = {
         e.*, 
         c.name as company_name, 
         c.slug as company_slug,
+        c.logo_url as company_logo_url,
+        c.domain as company_domain,
         (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'up') as up_cnt,
         (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'down') as down_cnt,
         (SELECT COUNT(*) FROM comments cm WHERE cm.experience_id = e.id AND cm.status = 'active') as comm_cnt,
@@ -705,6 +718,8 @@ export const db = {
         company_id: String(r.company_id),
         company_name: r.company_name ? String(r.company_name) : "Unknown Company",
         company_slug: r.company_slug ? String(r.company_slug) : "",
+        company_logo_url: r.company_logo_url ? String(r.company_logo_url) : (r.company_domain ? `https://unavatar.io/${r.company_domain}` : undefined),
+        company_domain: r.company_domain ? String(r.company_domain) : undefined,
         anonymous_id_hash: String(r.anonymous_id_hash),
         author_handle: "Anonymous Candidate",
         interview_stage: String(r.interview_stage),

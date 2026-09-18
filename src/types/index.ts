@@ -12,15 +12,17 @@ export type InterviewOutcome =
   | "Still Waiting"
   | "Never Responded"
   | "Ghosted After Final Round"
-  | "Ghost Job / Fake Listing";
+  | "Ghost Job / Fake Listing"
+  | "Rejected";
 
 export type ExperienceCategory =
   | "Ghosting"
   | "Zombie Interview"
   | "Infinite Waiting"
-  | "HR Circus"
+  | "Rejected"
   | "Unpaid Assignment"
-  | "Red Flag";
+  | "Red Flag"
+  | "HR Circus";
 
 export type LeaderboardFilter =
   | "overall"
@@ -86,6 +88,8 @@ export interface Experience {
   company_id: string;
   company_name?: string;
   company_slug?: string;
+  company_logo_url?: string;
+  company_domain?: string;
   anonymous_id_hash?: string;
   author_handle: string;
   interview_stage: string;
@@ -119,6 +123,7 @@ export interface LeaderboardItem {
   name: string;
   slug: string;
   industry?: string;
+  domain?: string;
   logo_url?: string;
   meme_punchline?: string;
   ghost_score: number;

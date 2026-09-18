@@ -25,7 +25,7 @@ const CATEGORIES: { label: string; value: ExperienceCategory | "all"; emoji: str
   { label: "Ghosting", value: "Ghosting", emoji: "👻" },
   { label: "Zombie Interview", value: "Zombie Interview", emoji: "🧟" },
   { label: "Infinite Waiting", value: "Infinite Waiting", emoji: "⏳" },
-  { label: "HR Circus", value: "HR Circus", emoji: "🤡" },
+  { label: "Rejected", value: "Rejected", emoji: "🚫" },
   { label: "Unpaid Assignment", value: "Unpaid Assignment", emoji: "💀" },
   { label: "Red Flag", value: "Red Flag", emoji: "🚩" },
 ];
@@ -178,12 +178,12 @@ function StoriesArchiveInner() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search companies, keywords, stages, or recruiters..."
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-base text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 hover:text-zinc-200"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-zinc-400 hover:text-white"
               >
                 Clear
               </button>
@@ -191,56 +191,56 @@ function StoriesArchiveInner() {
           </div>
 
           {/* Sort Buttons */}
-          <div className="flex items-center gap-1.5 self-start sm:self-auto bg-zinc-950 p-1 rounded-xl border border-zinc-800 shrink-0">
+          <div className="flex items-center gap-1.5 self-start sm:self-auto bg-zinc-950 p-1.5 rounded-xl border border-zinc-800 shrink-0">
             <button
               onClick={() => setSortBy("upvotes")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors ${
                 sortBy === "upvotes"
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-white"
               }`}
             >
-              <ThumbsUp className="w-3.5 h-3.5" />
+              <ThumbsUp className="w-4 h-4" />
               <span>Top Upvoted</span>
             </button>
             <button
               onClick={() => setSortBy("recent")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors ${
                 sortBy === "recent"
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-white"
               }`}
             >
-              <Flame className="w-3.5 h-3.5" />
+              <Flame className="w-4 h-4" />
               <span>Newest</span>
             </button>
             <button
               onClick={() => setSortBy("waiting")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors ${
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors ${
                 sortBy === "waiting"
-                  ? "bg-purple-600 text-white font-semibold"
-                  : "text-zinc-400 hover:text-zinc-200"
+                  ? "bg-purple-600 text-white shadow-sm"
+                  : "text-zinc-400 hover:text-white"
               }`}
             >
-              <Clock className="w-3.5 h-3.5" />
+              <Clock className="w-4 h-4" />
               <span>Longest Wait</span>
             </button>
           </div>
         </div>
 
         {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-xs text-zinc-500 flex items-center gap-1 pr-1 shrink-0 font-mono">
-            <Filter className="w-3 h-3" /> Filter:
+        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-none">
+          <span className="text-sm text-zinc-400 flex items-center gap-1.5 pr-1 shrink-0 font-medium">
+            <Filter className="w-4 h-4 text-purple-400" /> Filter:
           </span>
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
               onClick={() => setSelectedCategory(cat.value)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all flex items-center gap-1.5 shrink-0 ${
+              className={`px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 shrink-0 ${
                 selectedCategory === cat.value
-                  ? "bg-purple-600 text-white shadow-md shadow-purple-950/60 font-semibold"
-                  : "bg-zinc-950 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 border border-zinc-800"
+                  ? "bg-purple-600 text-white shadow-md shadow-purple-950/60"
+                  : "bg-zinc-950 text-zinc-300 hover:text-white hover:bg-zinc-800 border border-zinc-800"
               }`}
             >
               <span>{cat.emoji}</span>
@@ -250,17 +250,17 @@ function StoriesArchiveInner() {
         </div>
 
         {/* Live Counter */}
-        <div className="flex items-center justify-between text-xs font-mono text-zinc-400 pt-2 border-t border-zinc-800/60">
+        <div className="flex items-center justify-between text-sm font-medium text-zinc-400 pt-2.5 border-t border-zinc-800/80">
           <span>
-            Showing <strong className="text-purple-300">{visibleStories.length}</strong> of{" "}
-            <strong className="text-white">{filteredAndSorted.length}</strong> stories
+            Showing <strong className="text-purple-300 font-bold">{visibleStories.length}</strong> of{" "}
+            <strong className="text-white font-bold">{filteredAndSorted.length}</strong> stories
           </span>
           {selectedCategory !== "all" && (
             <button
               onClick={() => setSelectedCategory("all")}
-              className="text-purple-400 hover:underline"
+              className="text-xs sm:text-sm text-purple-400 hover:text-purple-300 underline font-semibold"
             >
-              Reset filter
+              Clear filter
             </button>
           )}
         </div>

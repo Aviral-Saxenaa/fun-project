@@ -31,6 +31,7 @@ const STAGES: InterviewStage[] = [
 const OUTCOMES: { label: string; value: InterviewOutcome; emoji: string }[] = [
   { label: "Ghosted", value: "Ghosted", emoji: "👻" },
   { label: "Still Waiting", value: "Still Waiting", emoji: "⏳" },
+  { label: "Rejected", value: "Rejected", emoji: "🚫" },
   { label: "Never Responded", value: "Never Responded", emoji: "🪦" },
   { label: "Ghosted After Final Round", value: "Ghosted After Final Round", emoji: "💀" },
   { label: "Ghost Job / Fake Listing", value: "Ghost Job / Fake Listing", emoji: "🚩" },
@@ -40,7 +41,7 @@ const CATEGORIES: { label: string; value: ExperienceCategory; emoji: string; des
   { label: "Ghosting", value: "Ghosting", emoji: "👻", desc: "Never heard back after promises" },
   { label: "Zombie Interview", value: "Zombie Interview", emoji: "🧟", desc: "Process refuses to die" },
   { label: "Infinite Waiting", value: "Infinite Waiting", emoji: "⏳", desc: "'We will get back to you soon'" },
-  { label: "HR Circus", value: "HR Circus", emoji: "🤡", desc: "A ridiculous clown experience" },
+  { label: "Rejected", value: "Rejected", emoji: "🚫", desc: "Cold automated rejection or no feedback" },
   { label: "Unpaid Assignment", value: "Unpaid Assignment", emoji: "💀", desc: "Free consulting disguised as interview" },
   { label: "Red Flag", value: "Red Flag", emoji: "🚩", desc: "Suspicious or toxic behavior" },
 ];
@@ -54,8 +55,21 @@ function SubmitFormContent() {
   const [companyId, setCompanyId] = useState(prefilledId);
   const [companySearch, setCompanySearch] = useState(prefilledName);
   const [searchResults, setSearchResults] = useState<Company[]>([]);
+  const [internetResult, setInternetResult] = useState<{
+    name: string;
+    domain: string;
+    logo_url: string;
+    existing_id: string | null;
+    existing_slug: string | null;
+  } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string; slug: string } | null>(
+  const [addingInternet, setAddingInternet] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<{
+    id: string;
+    name: string;
+    slug: string;
+    logo_url?: string;
+  } | null>(
     prefilledId && prefilledName ? { id: prefilledId, name: prefilledName, slug: "" } : null
   );
 
@@ -74,7 +88,7 @@ function SubmitFormContent() {
   const [createdSlug, setCreatedSlug] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
-  // Search company autocomplete
+  // Search company autocomplete (both local DB & live internet lookup)
   useEffect(() => {
     const trimmed = companySearch.trim();
     if (!trimmed || selectedCompany) {
@@ -84,29 +98,91 @@ function SubmitFormContent() {
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const res = await api.searchCompanies(trimmed);
-        setSearchResults(res);
+        const [localMatches, internetRes] = await Promise.all([
+          api.searchCompanies(trimmed).catch(() => []),
+          fetch(`/api/companies/lookup?q=${encodeURIComponent(trimmed)}`)
+            .then((r) => r.json())
+            .then((d) => d.found || null)
+            .catch(() => null),
+        ]);
+        setSearchResults(localMatches);
+        setInternetResult(internetRes);
       } catch (e) {
         console.error("Search failed", e);
       } finally {
         setIsSearching(false);
       }
-    }, 200);
+    }, 220);
 
     return () => clearTimeout(timer);
   }, [companySearch, selectedCompany]);
 
   const handleSelectCompany = (comp: Company) => {
-    setSelectedCompany(comp);
+    setSelectedCompany({
+      id: comp.id,
+      name: comp.name,
+      slug: comp.slug,
+      logo_url: comp.logo_url,
+    });
     setCompanyId(comp.id);
     setCompanySearch(comp.name);
     setSearchResults([]);
+    setInternetResult(null);
+  };
+
+  const handleSelectInternetResult = async (item: {
+    name: string;
+    domain: string;
+    existing_id: string | null;
+    existing_slug: string | null;
+  }) => {
+    if (item.existing_id) {
+      setSelectedCompany({
+        id: item.existing_id,
+        name: item.name,
+        slug: item.existing_slug || "",
+      });
+      setCompanyId(item.existing_id);
+      setCompanySearch(item.name);
+      setSearchResults([]);
+      setInternetResult(null);
+      return;
+    }
+
+    try {
+      setAddingInternet(true);
+      const res = await fetch(
+        `/api/companies/lookup?q=${encodeURIComponent(item.name)}&auto_add=true`
+      );
+      const data = await res.json();
+      if (data.found?.existing_id) {
+        setSelectedCompany({
+          id: data.found.existing_id,
+          name: data.found.name || item.name,
+          slug: data.found.existing_slug || "",
+          logo_url: data.found.logo_url,
+        });
+        setCompanyId(data.found.existing_id);
+        setCompanySearch(data.found.name || item.name);
+      } else {
+        setShowAddModal(true);
+      }
+    } catch (err) {
+      console.error("Auto-add error:", err);
+      setShowAddModal(true);
+    } finally {
+      setAddingInternet(false);
+      setSearchResults([]);
+      setInternetResult(null);
+    }
   };
 
   const handleClearCompany = () => {
     setSelectedCompany(null);
     setCompanyId("");
     setCompanySearch("");
+    setSearchResults([]);
+    setInternetResult(null);
   };
 
   const handleCivilizeWithAI = async () => {
@@ -256,31 +332,44 @@ function SubmitFormContent() {
       </div>
 
       {/* Safety Notice */}
-      <div className="p-3.5 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-start gap-3 text-xs text-zinc-400">
-        <AlertCircle className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-        <div>
-          <strong className="text-zinc-200">Community Safety Guidelines:</strong> Please describe what happened in your interview. Do NOT post personal phone numbers, emails, home addresses, or defamatory threats. Keep it focused on the hiring process!
+      <div className="p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 flex items-start gap-3.5 text-sm text-zinc-300">
+        <AlertCircle className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+        <div className="leading-relaxed">
+          <strong className="text-white font-bold">Community Safety Guidelines:</strong> Please describe what happened in your interview. Do NOT post personal phone numbers, emails, home addresses, or defamatory threats. Keep it focused on the hiring process!
         </div>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6 bg-zinc-900/60 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-xl">
+      <form onSubmit={handleSubmit} className="space-y-7 bg-zinc-900/70 border border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
         {/* Company Selector */}
-        <div className="space-y-1.5 relative">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
+        <div className="space-y-2 relative">
+          <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200">
             Company Name *
           </label>
 
           {selectedCompany ? (
-            <div className="flex items-center justify-between p-3 bg-zinc-950 border border-purple-500/50 rounded-xl text-sm text-white">
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-purple-400" />
-                <span className="font-semibold">{selectedCompany.name}</span>
+            <div className="flex items-center justify-between p-4 bg-zinc-950 border border-purple-500/60 rounded-2xl text-base text-white shadow-md">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center p-1 overflow-hidden shrink-0">
+                  {selectedCompany.logo_url ? (
+                    <img
+                      src={selectedCompany.logo_url}
+                      alt=""
+                      className="w-full h-full object-contain rounded-lg"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <Building2 className="w-5 h-5 text-purple-400" />
+                  )}
+                </div>
+                <span className="font-extrabold text-lg text-white">{selectedCompany.name}</span>
               </div>
               <button
                 type="button"
                 onClick={handleClearCompany}
-                className="text-xs text-zinc-400 hover:text-rose-400 font-mono underline"
+                className="text-sm text-zinc-400 hover:text-rose-400 font-medium px-3 py-1.5 rounded-lg hover:bg-zinc-900 transition-colors"
               >
                 Change
               </button>
@@ -296,45 +385,104 @@ function SubmitFormContent() {
                   setCompanySearch(val);
                   if (!val.trim()) {
                     setSearchResults([]);
+                    setInternetResult(null);
                   }
                 }}
-                placeholder="Type to search company (e.g. Acme, Google, Amazon...)"
-                className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                placeholder="Search or enter company name (e.g. Google, Stripe, Meta...)"
+                className="w-full px-4 py-3.5 bg-zinc-950 border border-zinc-800 rounded-2xl text-base text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
               />
 
-              {isSearching && (
-                <Loader2 className="w-4 h-4 animate-spin text-zinc-400 absolute right-3 top-3.5" />
+              {(isSearching || addingInternet) && (
+                <Loader2 className="w-5 h-5 animate-spin text-purple-400 absolute right-4 top-4" />
               )}
 
               {/* Autocomplete Dropdown */}
-              {searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 z-30 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl max-h-56 overflow-y-auto divide-y divide-zinc-800 p-1">
+              {(searchResults.length > 0 || (internetResult && !searchResults.some((s) => s.name.toLowerCase() === internetResult.name.toLowerCase()))) && (
+                <div className="absolute left-0 right-0 top-full mt-2 z-40 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl max-h-72 overflow-y-auto divide-y divide-zinc-800/80 p-2">
+                  {/* Database matches */}
                   {searchResults.map((c) => (
                     <button
                       key={c.id}
                       type="button"
                       onClick={() => handleSelectCompany(c)}
-                      className="w-full px-3 py-2 text-left hover:bg-zinc-800/80 rounded-lg flex items-center justify-between text-xs text-zinc-200"
+                      className="w-full px-3.5 py-2.5 text-left hover:bg-zinc-800/80 rounded-xl flex items-center justify-between text-sm text-zinc-100 transition-colors group"
                     >
-                      <span className="font-semibold">{c.name}</span>
-                      <span className="text-zinc-500 font-mono">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                          {c.logo_url ? (
+                            <img
+                              src={c.logo_url}
+                              alt=""
+                              className="w-full h-full object-contain"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <Building2 className="w-4 h-4 text-zinc-500" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-bold group-hover:text-purple-300 text-white">{c.name}</div>
+                          {c.industry && <div className="text-xs text-zinc-400">{c.industry}</div>}
+                        </div>
+                      </div>
+                      <span className="text-xs font-mono text-zinc-400 bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800">
                         {c.ghost_emoji} {c.ghost_score} ({c.report_count} reports)
                       </span>
                     </button>
                   ))}
+
+                  {/* Internet lookup match */}
+                  {internetResult && !searchResults.some((s) => s.name.toLowerCase() === internetResult.name.toLowerCase()) && (
+                    <div className="p-2">
+                      <div className="text-[11px] font-mono text-purple-400 uppercase tracking-wider mb-1.5 px-2">
+                        Web Directory Match
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectInternetResult(internetResult)}
+                        className="w-full px-3.5 py-2.5 text-left bg-purple-950/20 hover:bg-purple-950/40 border border-purple-500/30 rounded-xl flex items-center justify-between text-sm text-zinc-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-purple-500/40 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                            {internetResult.logo_url ? (
+                              <img
+                                src={internetResult.logo_url}
+                                alt=""
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <Building2 className="w-4 h-4 text-purple-400" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-bold text-white">{internetResult.name}</div>
+                            <div className="text-xs text-zinc-400">{internetResult.domain}</div>
+                          </div>
+                        </div>
+                        <span className="text-xs font-bold text-purple-300 bg-purple-900/60 px-2.5 py-1 rounded-lg border border-purple-700/50">
+                          {addingInternet ? "Adding..." : "+ Select & Add"}
+                        </span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {companySearch.trim().length > 1 && !isSearching && searchResults.length === 0 && (
-                <div className="mt-2 p-3 bg-zinc-950/80 border border-zinc-800/80 rounded-xl flex items-center justify-between text-xs">
-                  <span className="text-zinc-400">Not listed yet?</span>
+              {companySearch.trim().length > 1 && !isSearching && searchResults.length === 0 && !internetResult && (
+                <div className="mt-2.5 p-3.5 bg-zinc-950 border border-zinc-800 rounded-2xl flex items-center justify-between text-sm">
+                  <span className="text-zinc-400">Company not listed yet?</span>
                   <button
                     type="button"
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 font-bold"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500 text-purple-200 font-bold transition-all text-xs sm:text-sm"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add &ldquo;{companySearch}&rdquo; to database
+                    <Plus className="w-4 h-4" />
+                    <span>Add &ldquo;{companySearch}&rdquo;</span>
                   </button>
                 </div>
               )}
@@ -343,20 +491,20 @@ function SubmitFormContent() {
         </div>
 
         {/* Interview Stage */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
+        <div className="space-y-2">
+          <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200">
             Interview Stage
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {STAGES.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setStage(s)}
-                className={`px-3 py-2 rounded-xl text-xs font-medium border text-center transition-all ${
+                className={`px-3.5 py-2.5 rounded-xl text-sm font-semibold border text-center transition-all ${
                   stage === s
-                    ? "bg-purple-600/20 border-purple-500 text-purple-300 font-bold"
-                    : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    ? "bg-purple-600/20 border-purple-500 text-purple-200 font-bold shadow-sm"
+                    : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                 }`}
               >
                 {s}
@@ -366,20 +514,20 @@ function SubmitFormContent() {
         </div>
 
         {/* Outcome */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
+        <div className="space-y-2">
+          <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200">
             Outcome
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {OUTCOMES.map((o) => (
               <button
                 key={o.value}
                 type="button"
                 onClick={() => setOutcome(o.value)}
-                className={`px-2.5 py-2 rounded-xl text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
+                className={`px-3 py-2.5 rounded-xl text-sm font-semibold border flex items-center justify-center gap-2 transition-all ${
                   outcome === o.value
                     ? "bg-purple-600 border-purple-500 text-white font-bold shadow-md shadow-purple-950/50"
-                    : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"
                 }`}
               >
                 <span>{o.emoji}</span>
@@ -390,37 +538,37 @@ function SubmitFormContent() {
         </div>
 
         {/* Fun Category */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
-            Fun Category
+        <div className="space-y-2">
+          <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200">
+            Category
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
                 type="button"
                 onClick={() => setCategory(cat.value)}
-                className={`p-2.5 rounded-xl text-xs text-left border transition-all ${
+                className={`p-3.5 rounded-2xl text-left border transition-all ${
                   category === cat.value
-                    ? "bg-purple-950/40 border-purple-500 text-purple-200"
-                    : "bg-zinc-950 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300"
+                    ? "bg-purple-950/40 border-purple-500 text-purple-200 shadow-sm"
+                    : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
                 }`}
               >
-                <div className="font-bold flex items-center gap-1.5 text-zinc-200">
+                <div className="font-bold text-base flex items-center gap-2 text-white">
                   <span>{cat.emoji}</span>
                   <span>{cat.label}</span>
                 </div>
-                <div className="text-[11px] text-zinc-500 mt-0.5">{cat.desc}</div>
+                <div className="text-xs sm:text-sm text-zinc-400 mt-1 leading-snug">{cat.desc}</div>
               </button>
             ))}
           </div>
         </div>
 
         {/* Waiting duration & Interview rounds */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200 mb-2 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-400" />
               <span>How long did you wait? (days)</span>
             </label>
             <input
@@ -430,13 +578,13 @@ function SubmitFormContent() {
               value={waitingDays}
               onChange={(e) => setWaitingDays(e.target.value)}
               placeholder="e.g. 45"
-              className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-base text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-purple-400" />
+            <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200 mb-2 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-purple-400" />
               <span>Number of interview rounds</span>
             </label>
             <input
@@ -446,25 +594,25 @@ function SubmitFormContent() {
               value={interviewRounds}
               onChange={(e) => setInterviewRounds(e.target.value)}
               placeholder="e.g. 4"
-              className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-base text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500"
             />
           </div>
         </div>
 
         {/* Story Textarea */}
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
+            <label className="block text-sm font-bold uppercase tracking-wider text-zinc-200">
               What happened? *
             </label>
             <button
               type="button"
               onClick={handleCivilizeWithAI}
               disabled={polishing || !content.trim()}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold bg-gradient-to-r from-purple-900/50 to-indigo-900/50 border border-purple-500/40 text-purple-200 hover:text-white hover:border-purple-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
               title="Transform spicy rants and vulgar language into witty corporate satire"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles className="w-4 h-4 text-amber-400" />
               <span>{polishing ? "Polishing into satire..." : "✨ AI De-Vulgarize & Polish"}</span>
             </button>
           </div>
@@ -476,22 +624,22 @@ function SubmitFormContent() {
             onChange={(e) => setContent(e.target.value)}
             required
             placeholder="Had 4 interviews and a take-home assignment. They said they'd get back to me Monday morning. It is currently September..."
-            className="w-full p-3.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-all leading-relaxed"
+            className="w-full p-4 bg-zinc-950 border border-zinc-800 rounded-2xl text-base text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-all leading-relaxed"
           />
 
           {aiNote && (
-            <div className="p-2.5 bg-purple-950/40 border border-purple-500/30 rounded-xl text-xs text-purple-200 flex items-center gap-2">
+            <div className="p-3 bg-purple-950/40 border border-purple-500/30 rounded-xl text-sm text-purple-200 flex items-center gap-2">
               <span>✨</span>
               <span>{aiNote}</span>
             </div>
           )}
-          <p className="text-[11px] text-zinc-500 italic">
+          <p className="text-xs sm:text-sm text-zinc-400 italic">
             Tip: Keep it witty. Our AI automatically converts harsh profanity or spicy anger into hilarious corporate satire.
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 font-medium">
+          <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-sm text-rose-300 font-medium">
             {error}
           </div>
         )}
@@ -501,7 +649,7 @@ function SubmitFormContent() {
           id="submit-experience-form-btn"
           type="submit"
           disabled={submitting || !companyId || !content.trim()}
-          className="w-full py-3.5 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-xl shadow-purple-950/60 transition-all disabled:opacity-50 hover:scale-[1.01]"
+          className="w-full py-4 rounded-2xl text-base font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-xl shadow-purple-950/60 transition-all disabled:opacity-50 hover:scale-[1.01]"
         >
           {submitting ? "Sending your story into the void... 👻" : "Submit Experience"}
         </button>
