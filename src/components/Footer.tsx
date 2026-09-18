@@ -1,75 +1,62 @@
 import React from "react";
-import Link from "next/link";
-import { Trophy } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="border-t border-zinc-800/80 bg-zinc-950/90 mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Brand & philosophy */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">👻</span>
-              <span className="font-black text-lg tracking-tight text-white">GHOSTED</span>
-            </div>
-            <p className="text-sm font-semibold text-zinc-300">
-              &ldquo;They interviewed. They promised. They vanished.&rdquo;
-            </p>
-            <p className="text-xs text-zinc-400 italic">
-              &ldquo;Because apparently rejection emails are a premium feature.&rdquo;
-            </p>
-          </div>
+    <footer className="border-t border-zinc-800/80 bg-zinc-950 mt-20 py-16 px-4 flex items-center justify-center overflow-hidden">
+      <div className="w-full max-w-2xl mx-auto flex items-center justify-center">
+        <svg
+          viewBox="0 0 720 160"
+          className="w-full h-auto select-none overflow-visible"
+          aria-label="हम भी पेले गए थे, तुम भी पेले जाओगे"
+          role="img"
+        >
+          <defs>
+            {/* Gentle, natural upward arc (∩ shape) with ample headroom */}
+            <path
+              id="footer-semicircle-arc"
+              d="M 30,135 Q 360,20 690,135"
+              fill="none"
+            />
+            {/* Elegant, warm metallic gold-champagne gradient - soft on the eyes, perfectly legible */}
+            <linearGradient id="footer-text-warm" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#d4af37" />
+              <stop offset="35%" stopColor="#fef08a" />
+              <stop offset="50%" stopColor="#ffffff" />
+              <stop offset="65%" stopColor="#fef08a" />
+              <stop offset="100%" stopColor="#d4af37" />
+            </linearGradient>
 
-          {/* Quick navigation */}
-          <div className="space-y-2">
-            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Community Navigation
-            </div>
-            <ul className="space-y-1.5 text-xs text-zinc-400">
-              <li>
-                <Link
-                  href="/leaderboard"
-                  className="hover:text-purple-300 flex items-center gap-1.5 transition-colors"
-                >
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                  <span>The Ghost Leaderboard</span>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/submit"
-                  className="hover:text-purple-300 flex items-center gap-1.5 transition-colors"
-                >
-                  <span>👻 Share Your Experience</span>
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Soft, subtle warm ambient shadow without blinding blur */}
+            <filter id="gentle-glow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#f59e0b" floodOpacity="0.25" />
+            </filter>
+          </defs>
 
-          {/* Frictionless Privacy Promise */}
-          <div className="space-y-2">
-            <div className="text-xs font-bold uppercase tracking-wider text-zinc-400">
-              Frictionless Privacy
-            </div>
-            <div className="text-xs text-zinc-400 space-y-1.5">
-              <p>
-                <strong className="text-zinc-200">NO SIGN UP. NO LOGIN. NO EMAIL. NO PASSWORD.</strong>
-              </p>
-              <p className="leading-relaxed">
-                Candidate experiences are shared anonymously using client-side device hashes. No personal profiles are ever created or tracked.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-zinc-900 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-400 gap-4">
-          <p>© {new Date().getFullYear()} Ghosted. All community experiences are candidate submissions.</p>
-          <p className="font-mono text-[11px] text-zinc-400">
-            Waiting for HR to reply... ⏳
-          </p>
-        </div>
+          {/* Crisp, high-contrast base for perfect Devanagari matra & glyph clarity */}
+          <text
+            className="font-bold tracking-wide"
+            fill="url(#footer-text-warm)"
+            filter="url(#gentle-glow)"
+            style={{
+              fontSize: "27px",
+              fontWeight: 700,
+              fontFamily:
+                '"Noto Sans Devanagari", "Kohinoor Devanagari", "Mangal", "Nirmala UI", system-ui, -apple-system, sans-serif',
+            }}
+          >
+            <textPath
+              href="#footer-semicircle-arc"
+              startOffset="50%"
+              textAnchor="middle"
+            >
+              हम भी पेले गए थे, तुम भी पेले जाओगे
+            </textPath>
+          </text>
+        </svg>
       </div>
     </footer>
   );
 }
+
+
+
