@@ -96,81 +96,88 @@ export default function HomePage() {
   }, [selectedCategory]);
 
   return (
-    <div className="space-y-16 pb-20">
-      {/* Hero Section with 3D Three.js Ghost, Taglines, Meme Ticker & Main Search */}
-      <section className="relative pt-6 md:pt-12 pb-8 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center">
-        {/* Glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34rem] h-[34rem] bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div className="space-y-8 sm:space-y-12 pb-20">
+      {/* Hero Section: Left Text + Right 3D Ghost (High-Impact Above-the-Fold 1st Impression) */}
+      <section className="relative pt-4 sm:pt-8 md:pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* Ambient Glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36rem] h-[36rem] bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
 
-        {/* 3D Three.js Interactive Mascot Canvas */}
-        <div className="relative w-full max-w-md h-64 sm:h-72 mx-auto mb-3 flex flex-col items-center justify-center">
-          <GhostThreeCanvas />
-          <div className="text-xs font-mono text-purple-300/70 mt-1 pointer-events-none select-none">
-            ✨ Interactive 3D Mascot • Move mouse to steer, click to spin
-          </div>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+          {/* LEFT COLUMN: All Core Messaging, Punchline, Search Bar & Quick CTAs */}
+          <div className="lg:col-span-7 text-left space-y-4 sm:space-y-5">
+            {/* Tag Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-[11px] sm:text-xs font-mono text-zinc-300 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span>THE CORPORATE TRANSLATION ENGINE</span>
+            </div>
 
-        {/* Catchy Hero Title with HR Struck-Through Reality */}
-        <div className="max-w-3xl mx-auto mb-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-xs sm:text-sm font-mono text-zinc-300 mb-4 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span>THE CORPORATE TRANSLATION ENGINE</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1] sm:leading-[1.1]">
-            <span className="block text-zinc-100">Your application will be</span>
-            <span className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-1">
-              <span className="line-through decoration-zinc-500/80 decoration-4 sm:decoration-[6px] text-zinc-400">
-                reviewed
+            {/* Headline: Exactly Line 1 "Your application will be", Line 2 "reviewed ignored." */}
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
+              <span className="block text-zinc-100 whitespace-nowrap">Your application will be</span>
+              <span className="block mt-1">
+                <span className="line-through decoration-zinc-500/80 decoration-4 sm:decoration-[6px] text-zinc-400 mr-2 sm:mr-3">
+                  reviewed
+                </span>
+                <span className="text-red-500 underline decoration-red-500/50 decoration-4 sm:decoration-[6px]">
+                  ignored.
+                </span>
               </span>
-              <span className="text-red-500 underline decoration-red-500/40 decoration-4 sm:decoration-[6px]">
-                ignored.
-              </span>
-            </span>
-          </h1>
+            </h1>
 
-          <p className="text-lg sm:text-2xl font-extrabold text-purple-300 max-w-xl mx-auto mt-4 leading-snug">
-            &ldquo;We will get back to you by EOD&rdquo;{" "}
-            <span className="text-zinc-400 font-normal line-through decoration-red-500 decoration-2">
-              (Never)
-            </span>{" "}
-            <span className="text-amber-400 font-black">GHOSTED 👻</span>
-          </p>
+            {/* Sarcastic Subtitle */}
+            <p className="text-base sm:text-xl font-extrabold text-purple-300 leading-snug">
+              &ldquo;We will get back to you by EOD&rdquo;{" "}
+              <span className="text-zinc-400 font-normal line-through decoration-red-500 decoration-2">
+                (Never)
+              </span>{" "}
+              <span className="text-amber-400 font-black">GHOSTED 👻</span>
+            </p>
 
-          <p className="text-xs sm:text-sm text-zinc-400 italic max-w-md mx-auto mt-2">
-            Real candidate stories of vanishing recruiters, 9-round marathons, and sudden mass layoffs.
-          </p>
-        </div>
+            <p className="text-xs sm:text-sm text-zinc-400">
+              Unfiltered testimonies of vanishing recruiters, endless interview loops &amp; sudden mass layoffs.
+            </p>
 
-        {/* Meme Ticker: Catchy Quotes */}
-        <div className="mb-8">
-          <MemeTicker />
-        </div>
+            {/* Meme Ticker: Catchy Quotes */}
+            <div className="w-full">
+              <MemeTicker />
+            </div>
 
-        {/* Search Bar - Centerpiece */}
-        <div className="mb-7">
-          <SearchBar size="large" />
-        </div>
+            {/* Search Bar */}
+            <div className="pt-1">
+              <SearchBar size="large" />
+            </div>
 
-        {/* Hero Quick Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-3.5">
-          <Link
-            id="hero-leaderboard-btn"
-            href="/leaderboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-base font-bold bg-zinc-900 border border-zinc-700 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-600 shadow-md transition-all"
-          >
-            <Trophy className="w-5 h-5 text-amber-400" />
-            <span>🏆 Ghost Leaderboard</span>
-          </Link>
+            {/* Hero Quick Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link
+                id="hero-leaderboard-btn"
+                href="/leaderboard"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-zinc-900 border border-zinc-700 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-600 shadow-md transition-all"
+              >
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <span>🏆 Ghost Leaderboard</span>
+              </Link>
 
-          <Link
-            id="hero-submit-btn"
-            href="/submit"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl text-base font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/60 transition-all hover:scale-[1.02]"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Got Ghosted? Tell the Internet</span>
-          </Link>
+              <Link
+                id="hero-submit-btn"
+                href="/submit"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/60 transition-all hover:scale-[1.02]"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Got Ghosted? Tell Us</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: 3D Interactive Ghost Mascot Canvas */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+            <div className="relative w-full max-w-sm sm:max-w-md h-64 sm:h-80 md:h-96 flex flex-col items-center justify-center rounded-3xl bg-radial from-purple-950/30 via-transparent to-transparent">
+              <GhostThreeCanvas />
+              <div className="absolute bottom-1 text-[11px] font-mono text-purple-300/70 pointer-events-none select-none text-center bg-zinc-950/60 px-3 py-0.5 rounded-full border border-purple-500/20 backdrop-blur-sm">
+                ✨ Interactive Mascot • Move mouse to steer, click to spin
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
