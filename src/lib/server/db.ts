@@ -49,6 +49,37 @@ export interface CommentRecord {
 // In-memory rate limiting map (per-instance protection against rapid spam)
 const rateLimits = new Map<string, { timestamp: number }[]>();
 
+// In-memory query cache with TTL (protects free-tier Turso DB from repetitive reads)
+interface CacheEntry<T> {
+  data: T;
+  expiry: number;
+}
+const queryCache = new Map<string, CacheEntry<any>>();
+
+export function getCached<T>(key: string): T | null {
+  const entry = queryCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiry) {
+    queryCache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+export function setCached<T>(key: string, data: T, ttlSeconds: number): void {
+  if (queryCache.size > 200) {
+    queryCache.clear();
+  }
+  queryCache.set(key, {
+    data,
+    expiry: Date.now() + ttlSeconds * 1000,
+  });
+}
+
+export function clearCache(): void {
+  queryCache.clear();
+}
+
 export const db = {
   // Check rate limit to prevent spam
   checkRateLimit(
@@ -128,6 +159,10 @@ export const db = {
     await ensureDatabase();
     const q = query.toLowerCase().trim();
 
+    const cacheKey = `search:${q}:${limit}`;
+    const cached = getCached<Company[]>(cacheKey);
+    if (cached) return cached;
+
     let sql = "SELECT * FROM companies";
     const args: (string | number)[] = [];
 
@@ -140,20 +175,43 @@ export const db = {
     sql += " ORDER BY name ASC LIMIT ?";
     args.push(limit);
 
-    const res = await sqlite.execute({ sql, args });
-    const companies: Company[] = [];
+    const compRes = await sqlite.execute({ sql, args });
+    if (compRes.rows.length === 0) return [];
 
-    for (const r of res.rows) {
-      const stats = await this.getCompanyStats(String(r.id));
-      const score = calculateGhostScore(
-        stats.ghost_reports,
-        stats.total_reports,
-        0,
-        stats.unique_reporters
-      );
+    const companyIds = compRes.rows.map((r) => String(r.id));
+    const placeholders = companyIds.map(() => "?").join(",");
 
-      companies.push({
-        id: String(r.id),
+    const statsRes = await sqlite.execute({
+      sql: `SELECT company_id, outcome, anonymous_id_hash 
+            FROM experiences 
+            WHERE status = 'active' AND company_id IN (${placeholders})`,
+      args: companyIds,
+    });
+
+    const statsMap = new Map<string, { total: number; ghost: number; reporters: Set<string> }>();
+    for (const r of statsRes.rows) {
+      const cid = String(r.company_id);
+      let s = statsMap.get(cid);
+      if (!s) {
+        s = { total: 0, ghost: 0, reporters: new Set<string>() };
+        statsMap.set(cid, s);
+      }
+      s.total++;
+      const outcome = String(r.outcome || "");
+      if (outcome !== "Offered" && outcome !== "Hired") {
+        s.ghost++;
+      }
+      const hash = String(r.anonymous_id_hash || "");
+      if (hash) s.reporters.add(hash);
+    }
+
+    const companies: Company[] = compRes.rows.map((r) => {
+      const cid = String(r.id);
+      const s = statsMap.get(cid) || { total: 0, ghost: 0, reporters: new Set<string>() };
+      const score = calculateGhostScore(s.ghost, s.total, 0, s.reporters.size);
+
+      return {
+        id: cid,
         name: String(r.name),
         slug: String(r.slug),
         website: r.website ? String(r.website) : undefined,
@@ -165,10 +223,11 @@ export const db = {
         ghost_score: score,
         ghost_label: getGhostLabel(score),
         ghost_emoji: getGhostEmoji(score),
-        report_count: stats.total_reports,
-      });
-    }
+        report_count: s.total,
+      };
+    });
 
+    setCached(cacheKey, companies, 45); // 45s TTL
     return companies;
   },
 
@@ -266,6 +325,8 @@ export const db = {
       ],
     });
 
+    clearCache();
+
     return {
       id,
       name: cleanName,
@@ -280,6 +341,10 @@ export const db = {
   },
 
   async getLeaderboard(filter: string = "overall", limit = 50): Promise<LeaderboardItem[]> {
+    const cacheKey = `leaderboard:${filter}:${limit}`;
+    const cached = getCached<LeaderboardItem[]>(cacheKey);
+    if (cached) return cached;
+
     await ensureDatabase();
     const [compRes, expsRes] = await Promise.all([
       sqlite.execute("SELECT * FROM companies"),
@@ -399,10 +464,16 @@ export const db = {
       board.sort((a, b) => b.ghost_score - a.ghost_score || b.report_count - a.report_count);
     }
 
-    return board.slice(0, limit);
+    const result = board.slice(0, limit);
+    setCached(cacheKey, result, 30); // 30s TTL
+    return result;
   },
 
   async getCompanyDetail(slug: string): Promise<CompanyDetail | null> {
+    const cacheKey = `company:${slug}`;
+    const cached = getCached<CompanyDetail>(cacheKey);
+    if (cached) return cached;
+
     const company = await this.getCompanyBySlug(slug);
     if (!company) return null;
     const stats = await this.getCompanyStats(company.id);
@@ -412,21 +483,31 @@ export const db = {
       0,
       stats.unique_reporters
     );
-    return {
+    const result = {
       company,
       ghost_score: score,
       ghost_label: getGhostLabel(score),
       ghost_emoji: getGhostEmoji(score),
       stats,
     };
+
+    setCached(cacheKey, result, 30); // 30s TTL
+    return result;
   },
 
   async getPlatformStats(): Promise<PlatformStats> {
+    const cacheKey = "platform:stats";
+    const cached = getCached<PlatformStats>(cacheKey);
+    if (cached) return cached;
+
     await ensureDatabase();
 
-    const expsRes = await sqlite.execute(`
-      SELECT outcome, waiting_days, id FROM experiences WHERE status = 'active'
-    `);
+    const [expsRes, voteCountRes, trending] = await Promise.all([
+      sqlite.execute("SELECT outcome, waiting_days, id FROM experiences WHERE status = 'active'"),
+      sqlite.execute("SELECT COUNT(*) as total_upvotes FROM votes WHERE vote_type = 'up'"),
+      this.getLeaderboard("trending", 5),
+    ]);
+
     const activeExps = expsRes.rows;
 
     const peopleWaiting = activeExps.filter(
@@ -443,19 +524,14 @@ export const db = {
       longestWaitStr = `${Math.round(maxWaitDays / 30)} months`;
     }
 
-    const voteCountRes = await sqlite.execute(`
-      SELECT COUNT(*) as total_upvotes FROM votes WHERE vote_type = 'up'
-    `);
     const maxVotes = Number(voteCountRes.rows[0]?.total_upvotes || 0);
-
-    const trending = await this.getLeaderboard("trending", 5);
     const totalStories = activeExps.length;
 
     const displayWaiting = peopleWaiting >= 10 ? peopleWaiting * 1420 + 2821 : 24821;
     const displayStories = totalStories >= 10 ? totalStories * 1840 + 31284 : 31284;
     const displayUpvotes = maxVotes > 0 ? maxVotes * 1200 + 482 : 18200;
 
-    return {
+    const stats: PlatformStats = {
       people_waiting: displayWaiting,
       longest_wait_str: maxWaitDays >= 300 ? "11 months" : longestWaitStr,
       longest_wait_days: maxWaitDays,
@@ -463,6 +539,9 @@ export const db = {
       stories_submitted: displayStories,
       top_trending: trending,
     };
+
+    setCached(cacheKey, stats, 30); // 30s TTL
+    return stats;
   },
 
   async createExperience(data: {
@@ -496,6 +575,8 @@ export const db = {
         createdAt,
       ],
     });
+
+    clearCache();
 
     return {
       id,
@@ -648,6 +729,7 @@ export const db = {
       sql: "UPDATE experiences SET status = 'deleted' WHERE id = ?",
       args: [experienceId],
     });
+    clearCache();
     return res.rowsAffected > 0;
   },
 
@@ -691,13 +773,14 @@ export const db = {
       });
     }
 
-    const upRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM votes WHERE experience_id = ? AND vote_type = 'up'",
-      args: [experienceId],
-    });
-    const downRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM votes WHERE experience_id = ? AND vote_type = 'down'",
-      args: [experienceId],
+    clearCache();
+
+    // Unified single query for both counts
+    const countRes = await sqlite.execute({
+      sql: `SELECT 
+              (SELECT COUNT(*) FROM votes WHERE experience_id = ? AND vote_type = 'up') as up_cnt,
+              (SELECT COUNT(*) FROM votes WHERE experience_id = ? AND vote_type = 'down') as down_cnt`,
+      args: [experienceId, experienceId],
     });
 
     const seedNum = experienceId.startsWith("exp-")
@@ -706,8 +789,8 @@ export const db = {
     const baseUp = seedNum > 0 ? 120 + seedNum * 85 : 0;
 
     return {
-      upvotes: Number(upRes.rows[0]?.cnt || 0) + baseUp,
-      downvotes: Number(downRes.rows[0]?.cnt || 0),
+      upvotes: Number(countRes.rows[0]?.up_cnt || 0) + baseUp,
+      downvotes: Number(countRes.rows[0]?.down_cnt || 0),
       user_vote: newUserVote,
     };
   },
@@ -728,6 +811,8 @@ export const db = {
       args: [id, experienceId, hashed, content.trim(), createdAt],
     });
 
+    clearCache();
+
     return {
       id,
       experience_id: experienceId,
@@ -747,53 +832,39 @@ export const db = {
     await ensureDatabase();
     const hashed = anonymousId ? hashAnonymousId(anonymousId) : null;
 
-    const res = await sqlite.execute({
-      sql: `SELECT * FROM comments 
-            WHERE experience_id = ? AND status = 'active'
-            ORDER BY created_at ASC
-            LIMIT ? OFFSET ?`,
-      args: [experienceId, limit, offset],
-    });
-
-    const comments = [];
-
-    for (const r of res.rows) {
-      const commId = String(r.id);
-
-      const upRes = await sqlite.execute({
-        sql: "SELECT COUNT(*) as cnt FROM comment_votes WHERE comment_id = ? AND vote_type = 'up'",
-        args: [commId],
-      });
-      const downRes = await sqlite.execute({
-        sql: "SELECT COUNT(*) as cnt FROM comment_votes WHERE comment_id = ? AND vote_type = 'down'",
-        args: [commId],
-      });
-
-      let userVote: "up" | "down" | null = null;
-      if (hashed) {
-        const uvRes = await sqlite.execute({
-          sql: "SELECT vote_type FROM comment_votes WHERE comment_id = ? AND anonymous_id_hash = ? LIMIT 1",
-          args: [commId, hashed],
-        });
-        if (uvRes.rows.length > 0) {
-          userVote = uvRes.rows[0].vote_type as "up" | "down";
-        }
-      }
-
-      comments.push({
-        id: commId,
-        experience_id: String(r.experience_id),
-        anonymous_id_hash: String(r.anonymous_id_hash),
-        content: String(r.content),
-        created_at: String(r.created_at),
-        status: "active" as const,
-        upvotes: Number(upRes.rows[0]?.cnt || 0),
-        downvotes: Number(downRes.rows[0]?.cnt || 0),
-        user_vote: userVote,
-      });
+    const args: (string | number)[] = [];
+    let userVoteSql = "NULL as user_vote";
+    if (hashed) {
+      userVoteSql = "(SELECT cv.vote_type FROM comment_votes cv WHERE cv.comment_id = c.id AND cv.anonymous_id_hash = ? LIMIT 1) as user_vote";
+      args.push(hashed);
     }
 
-    return comments;
+    const sql = `
+      SELECT 
+        c.*,
+        (SELECT COUNT(*) FROM comment_votes cv WHERE cv.comment_id = c.id AND cv.vote_type = 'up') as up_cnt,
+        (SELECT COUNT(*) FROM comment_votes cv WHERE cv.comment_id = c.id AND cv.vote_type = 'down') as down_cnt,
+        ${userVoteSql}
+      FROM comments c
+      WHERE c.experience_id = ? AND c.status = 'active'
+      ORDER BY c.created_at ASC
+      LIMIT ? OFFSET ?
+    `;
+    args.push(experienceId, limit, offset);
+
+    const res = await sqlite.execute({ sql, args });
+
+    return res.rows.map((r) => ({
+      id: String(r.id),
+      experience_id: String(r.experience_id),
+      anonymous_id_hash: String(r.anonymous_id_hash),
+      content: String(r.content),
+      created_at: String(r.created_at),
+      status: "active" as const,
+      upvotes: Number(r.up_cnt || 0),
+      downvotes: Number(r.down_cnt || 0),
+      user_vote: (r.user_vote as "up" | "down" | null) || null,
+    }));
   },
 
   async deleteComment(commentId: string): Promise<boolean> {
@@ -802,6 +873,7 @@ export const db = {
       sql: "UPDATE comments SET status = 'deleted' WHERE id = ?",
       args: [commentId],
     });
+    clearCache();
     return res.rowsAffected > 0;
   },
 
@@ -842,18 +914,19 @@ export const db = {
       });
     }
 
-    const upRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM comment_votes WHERE comment_id = ? AND vote_type = 'up'",
-      args: [commentId],
-    });
-    const downRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM comment_votes WHERE comment_id = ? AND vote_type = 'down'",
-      args: [commentId],
+    clearCache();
+
+    // Unified single query for both comment vote counts
+    const countRes = await sqlite.execute({
+      sql: `SELECT 
+              (SELECT COUNT(*) FROM comment_votes WHERE comment_id = ? AND vote_type = 'up') as up_cnt,
+              (SELECT COUNT(*) FROM comment_votes WHERE comment_id = ? AND vote_type = 'down') as down_cnt`,
+      args: [commentId, commentId],
     });
 
     return {
-      upvotes: Number(upRes.rows[0]?.cnt || 0),
-      downvotes: Number(downRes.rows[0]?.cnt || 0),
+      upvotes: Number(countRes.rows[0]?.up_cnt || 0),
+      downvotes: Number(countRes.rows[0]?.down_cnt || 0),
       user_vote: newUserVote,
     };
   },

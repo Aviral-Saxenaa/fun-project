@@ -97,7 +97,9 @@ export async function ensureDatabase(): Promise<void> {
         `CREATE INDEX IF NOT EXISTS idx_exp_company ON experiences(company_id, status);`,
         `CREATE INDEX IF NOT EXISTS idx_votes_exp ON votes(experience_id, vote_type);`,
         `CREATE INDEX IF NOT EXISTS idx_votes_user ON votes(experience_id, anonymous_id_hash);`,
-        `CREATE INDEX IF NOT EXISTS idx_comm_exp ON comments(experience_id, status);`
+        `CREATE INDEX IF NOT EXISTS idx_comm_exp ON comments(experience_id, status);`,
+        `CREATE INDEX IF NOT EXISTS idx_comm_votes_id ON comment_votes(comment_id, vote_type);`,
+        `CREATE INDEX IF NOT EXISTS idx_comm_votes_user ON comment_votes(comment_id, anonymous_id_hash);`
       ]);
 
       // 2. Check if seeded
