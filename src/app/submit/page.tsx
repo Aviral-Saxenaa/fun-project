@@ -339,13 +339,16 @@ function SubmitFormContent() {
         </Link>
 
         <div className="flex items-center gap-3">
-          <span className="text-4xl">👻</span>
+          <span className="text-3xl sm:text-4xl">👻</span>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Got Ghosted? Tell the internet.
+            <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight flex flex-wrap items-center gap-x-2">
+              <span className="line-through decoration-zinc-500/80 decoration-2 text-zinc-400">
+                &ldquo;we&apos;ll be in touch&rdquo;
+              </span>
+              <span className="text-rose-400">GHOSTED?</span>
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
-              100% Anonymous. No email, no passwords, no profiles.
+              100% Anonymous. Expose the silence without creating an account.
             </p>
           </div>
         </div>

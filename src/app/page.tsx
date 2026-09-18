@@ -110,18 +110,37 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Title & Taglines with increased eye-friendly scale */}
-        <h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-white mb-4">
-          GHOSTED 👻
-        </h1>
+        {/* Catchy Hero Title with HR Struck-Through Reality */}
+        <div className="max-w-3xl mx-auto mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-xs sm:text-sm font-mono text-zinc-300 mb-4 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+            <span>THE CORPORATE TRANSLATION ENGINE</span>
+          </div>
 
-        <p className="text-xl sm:text-3xl font-extrabold text-purple-300 max-w-2xl mx-auto mb-3 leading-snug">
-          They interviewed. They promised. They vanished.
-        </p>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-[1.1] sm:leading-[1.1]">
+            <span className="block text-zinc-100">Your application will be</span>
+            <span className="inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mt-1">
+              <span className="line-through decoration-zinc-500/80 decoration-4 sm:decoration-[6px] text-zinc-400">
+                reviewed
+              </span>
+              <span className="text-red-500 underline decoration-red-500/40 decoration-4 sm:decoration-[6px]">
+                ignored.
+              </span>
+            </span>
+          </h1>
 
-        <p className="text-base sm:text-lg text-zinc-300 italic max-w-xl mx-auto mb-7">
-          &ldquo;Because apparently rejection emails are a premium feature.&rdquo;
-        </p>
+          <p className="text-lg sm:text-2xl font-extrabold text-purple-300 max-w-xl mx-auto mt-4 leading-snug">
+            &ldquo;We will get back to you by EOD&rdquo;{" "}
+            <span className="text-zinc-400 font-normal line-through decoration-red-500 decoration-2">
+              (Never)
+            </span>{" "}
+            <span className="text-amber-400 font-black">GHOSTED 👻</span>
+          </p>
+
+          <p className="text-xs sm:text-sm text-zinc-400 italic max-w-md mx-auto mt-2">
+            Real candidate stories of vanishing recruiters, 9-round marathons, and sudden mass layoffs.
+          </p>
+        </div>
 
         {/* Meme Ticker: Catchy Quotes */}
         <div className="mb-8">

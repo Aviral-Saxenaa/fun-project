@@ -66,12 +66,17 @@ export default function LeaderboardPage() {
           🏆 THE GHOST LEADERBOARD
         </h1>
 
-        <p className="text-base sm:text-lg text-purple-300 font-medium">
-          &ldquo;The companies candidates are still waiting to hear from.&rdquo;
-        </p>
+        <div className="flex flex-wrap items-center justify-center gap-2 text-base sm:text-xl font-bold">
+          <span className="line-through decoration-zinc-500/80 decoration-2 text-zinc-400">
+            &ldquo;we keep your profile in our active talent pool&rdquo;
+          </span>
+          <span className="text-rose-400 underline decoration-rose-500/40">
+            GHOSTED 👻
+          </span>
+        </div>
 
         <p className="text-xs text-zinc-400 italic">
-          Congratulations to this week&apos;s biggest ghosts. Based on verified candidate reports.
+          Hall of Fame for corporate radio silence &amp; vanishing recruiters.
         </p>
       </div>
 

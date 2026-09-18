@@ -145,10 +145,18 @@ function StoriesArchiveInner() {
         </div>
 
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight mb-3">
-          THE GHOST ARCHIVE 🗄️
+          <span className="block text-zinc-100">THE GHOST ARCHIVE</span>
+          <span className="inline-flex flex-wrap items-center justify-center gap-2 mt-1 text-2xl sm:text-4xl">
+            <span className="line-through decoration-zinc-500/80 decoration-3 text-zinc-400 font-bold">
+              &ldquo;we will revert&rdquo;
+            </span>
+            <span className="text-red-500 underline decoration-red-500/50 decoration-3 font-black">
+              GHOSTED 👻
+            </span>
+          </span>
         </h1>
-        <p className="text-base sm:text-lg text-purple-200 font-medium max-w-xl mx-auto mb-6">
-          Unfiltered candidate testimonies from the hiring trenches. Real interviews, vanishing recruiters, and zero corporate spin.
+        <p className="text-sm sm:text-base text-purple-200 font-medium max-w-xl mx-auto mb-6">
+          Unfiltered candidate testimonies from the hiring trenches. Real interviews, vanishing recruiters, and zero corporate PR.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">

@@ -16,17 +16,23 @@ export function Navbar() {
           {/* Brand Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 group focus:outline-none"
+            className="flex items-center gap-2 sm:gap-2.5 group focus:outline-none min-w-0"
           >
-            <div className="w-10 h-10 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xl shadow-lg shadow-purple-950/50 group-hover:scale-105 group-hover:border-purple-400 transition-all duration-200">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-lg sm:text-xl shadow-lg shadow-purple-950/50 group-hover:scale-105 group-hover:border-purple-400 transition-all duration-200 shrink-0">
               👻
             </div>
-            <div className="flex flex-col">
-              <span className="font-black text-xl tracking-tight text-white group-hover:text-purple-300 transition-colors">
-                GHOSTED
-              </span>
-              <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline tracking-wide">
-                ANONYMOUS LEADERBOARD
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-baseline gap-1.5 leading-none">
+                <span className="font-black text-lg sm:text-xl tracking-tight text-white group-hover:text-purple-300 transition-colors">
+                  GHOSTED
+                </span>
+                <span className="hidden sm:inline-flex items-center text-[10px] font-mono text-zinc-500 line-through decoration-rose-500/80 decoration-2">
+                  &ldquo;we&apos;ll get back to you&rdquo;
+                </span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-mono tracking-wide truncate">
+                <span className="text-zinc-500 line-through hidden xs:inline sm:hidden">&ldquo;will revert&rdquo; </span>
+                ANONYMOUS VAULT
               </span>
             </div>
           </Link>
