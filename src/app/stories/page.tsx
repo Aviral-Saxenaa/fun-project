@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { Experience, ExperienceCategory } from "@/types";
 import { ExperienceCard } from "@/components/ExperienceCard";
 import { GhostArchiveRadar3D } from "@/components/GhostArchiveRadar3D";
+import { FullscreenMemeModal } from "@/components/FullscreenMemeModal";
 import {
   Flame,
   Search,
@@ -23,6 +24,7 @@ import {
 const CATEGORIES: { label: string; value: ExperienceCategory | "all"; emoji: string }[] = [
   { label: "All Stories", value: "all", emoji: "✨" },
   { label: "Ghosting", value: "Ghosting", emoji: "👻" },
+  { label: "Layoff Shock", value: "Layoff Shock", emoji: "🪓" },
   { label: "Zombie Interview", value: "Zombie Interview", emoji: "🧟" },
   { label: "Infinite Waiting", value: "Infinite Waiting", emoji: "⏳" },
   { label: "Rejected", value: "Rejected", emoji: "🚫" },
@@ -38,6 +40,7 @@ function StoriesArchiveInner() {
 
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<ExperienceCategory | "all">(initialCategory);
+  const [activeMemeCategory, setActiveMemeCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("upvotes");
   const [loading, setLoading] = useState(true);
@@ -236,7 +239,12 @@ function StoriesArchiveInner() {
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
-              onClick={() => setSelectedCategory(cat.value)}
+              onClick={() => {
+                setSelectedCategory(cat.value);
+                if (cat.value !== "all") {
+                  setActiveMemeCategory(cat.value);
+                }
+              }}
               className={`px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 shrink-0 ${
                 selectedCategory === cat.value
                   ? "bg-purple-600 text-white shadow-md shadow-purple-950/60"
@@ -248,6 +256,14 @@ function StoriesArchiveInner() {
             </button>
           ))}
         </div>
+
+        {/* Fullscreen Meme Reaction Modal */}
+        {activeMemeCategory && (
+          <FullscreenMemeModal
+            category={activeMemeCategory}
+            onClose={() => setActiveMemeCategory(null)}
+          />
+        )}
 
         {/* Live Counter */}
         <div className="flex items-center justify-between text-sm font-medium text-zinc-400 pt-2.5 border-t border-zinc-800/80">

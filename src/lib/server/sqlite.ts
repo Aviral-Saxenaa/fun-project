@@ -379,6 +379,32 @@ export async function ensureDatabase(): Promise<void> {
         category: "Ghosting",
         created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
       },
+      {
+        id: "exp-google-layoff",
+        company_id: "c-google",
+        anonymous_id_hash: hashAnonymousId("seed-user-glay"),
+        interview_stage: "Offer Stage",
+        outcome: "Laid Off / Mass Layoff",
+        content:
+          "Accepted written offer, resigned from my previous job, and completed remote onboarding. On day 3, 12,000 employees were laid off via 3 AM email. Laptop access cut instantly. Total devastation.",
+        waiting_days: 3,
+        interview_rounds: 6,
+        category: "Layoff Shock",
+        created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+      },
+      {
+        id: "exp-meta-layoff",
+        company_id: "c-meta",
+        anonymous_id_hash: hashAnonymousId("seed-user-mlay"),
+        interview_stage: "Manager",
+        outcome: "Laid Off / Mass Layoff",
+        content:
+          "Mark's 'Year of Efficiency' hit our entire org on a random Wednesday morning. Got an email titled 'Your Status at Meta' while sipping morning coffee. Slack logged out 4 minutes later. Sabka katega!",
+        waiting_days: 1,
+        interview_rounds: 5,
+        category: "Layoff Shock",
+        created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+      },
     ];
 
     for (const exp of experiences) {

@@ -10,6 +10,8 @@ import { GhostScoreBadge } from "@/components/GhostScoreBadge";
 import { GhostThreeCanvas } from "@/components/GhostThreeCanvas";
 import { MemeTicker } from "@/components/MemeTicker";
 import { AddCompanyModal } from "@/components/AddCompanyModal";
+import { DoomsdayClock } from "@/components/DoomsdayClock";
+import { FullscreenMemeModal } from "@/components/FullscreenMemeModal";
 import {
   Trophy,
   Plus,
@@ -29,6 +31,7 @@ import {
 const CATEGORIES: { label: string; value: ExperienceCategory | "all"; emoji: string }[] = [
   { label: "All Stories", value: "all", emoji: "✨" },
   { label: "Ghosting", value: "Ghosting", emoji: "👻" },
+  { label: "Layoff Shock", value: "Layoff Shock", emoji: "🪓" },
   { label: "Zombie Interview", value: "Zombie Interview", emoji: "🧟" },
   { label: "Infinite Waiting", value: "Infinite Waiting", emoji: "⏳" },
   { label: "Rejected", value: "Rejected", emoji: "🚫" },
@@ -43,6 +46,7 @@ export default function HomePage() {
   const [leaderboardTop5, setLeaderboardTop5] = useState<LeaderboardItem[]>([]);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<ExperienceCategory | "all">("all");
+  const [activeMemeCategory, setActiveMemeCategory] = useState<string | null>(null);
   const [loadingExps, setLoadingExps] = useState(true);
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false);
 
@@ -206,6 +210,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 2040 Doomsday Clock Banner */}
+      <DoomsdayClock />
+
       {/* Main Section: Twitter/X Style Two-Column Layout (Left: Experiences Feed, Right: Sticky Leaderboard) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -221,7 +228,7 @@ export default function HomePage() {
                   </span>
                 </h2>
                 <p className="text-sm sm:text-base text-zinc-400 mt-1">
-                  Real unfiltered interview encounters. Upvote &amp; comment without an account.
+                  Real unfiltered interview &amp; layoff encounters. Upvote &amp; comment without an account.
                 </p>
               </div>
 
@@ -234,7 +241,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* Category Filter Pills (includes Rejected, removed HR Circus) */}
+            {/* Category Filter Pills (includes Layoff Shock, triggers meme reaction) */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
               <span className="text-sm text-zinc-400 flex items-center gap-1.5 pr-1 shrink-0 font-medium">
                 <Filter className="w-4 h-4 text-purple-400" /> Filter:
@@ -242,7 +249,12 @@ export default function HomePage() {
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.value}
-                  onClick={() => setSelectedCategory(cat.value)}
+                  onClick={() => {
+                    setSelectedCategory(cat.value);
+                    if (cat.value !== "all") {
+                      setActiveMemeCategory(cat.value);
+                    }
+                  }}
                   className={`px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2 shrink-0 ${
                     selectedCategory === cat.value
                       ? "bg-purple-600 text-white shadow-md shadow-purple-950/60 font-bold"
@@ -254,6 +266,14 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
+
+            {/* Fullscreen Meme Reaction Modal triggered by Category Filter */}
+            {activeMemeCategory && (
+              <FullscreenMemeModal
+                category={activeMemeCategory}
+                onClose={() => setActiveMemeCategory(null)}
+              />
+            )}
 
             {/* Stories Feed List */}
             {loadingExps ? (

@@ -14,8 +14,10 @@ import {
   Briefcase,
   Layers,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { CommentSection } from "./CommentSection";
+import { FullscreenMemeModal } from "./FullscreenMemeModal";
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -29,6 +31,7 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
     experience.user_vote || null
   );
   const [showComments, setShowComments] = useState(false);
+  const [showMemeModal, setShowMemeModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const authorName =
@@ -86,6 +89,8 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
         return "bg-emerald-500/20 text-emerald-300 border-emerald-500/50";
       case "Rejected":
         return "bg-rose-500/20 text-rose-300 border-rose-500/50";
+      case "Laid Off / Mass Layoff":
+        return "bg-red-500/25 text-red-300 border-red-500/60";
       default:
         return "bg-zinc-800 text-zinc-300 border-zinc-700";
     }
@@ -100,6 +105,10 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
     if (cat === "Rejected" || cat === "HR Circus") {
       emoji = "🚫";
       label = "Rejected";
+    }
+    if (cat === "Layoff Shock") {
+      emoji = "🪓";
+      label = "Layoff Shock";
     }
     if (cat === "Unpaid Assignment") emoji = "💀";
     if (cat === "Red Flag") emoji = "🚩";
@@ -271,7 +280,18 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
           </button>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
+          {/* Meme Reaction Button */}
+          <button
+            id={`meme-btn-${experience.id}`}
+            onClick={() => setShowMemeModal(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-sm transition-all group/meme"
+            title="View Savage Meme Reaction"
+          >
+            <span className="group-hover/meme:scale-125 transition-transform text-sm">😂</span>
+            <span className="hidden sm:inline">Meme React</span>
+          </button>
+
           {/* Share */}
           <button
             onClick={handleShare}
@@ -282,6 +302,14 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
           </button>
         </div>
       </div>
+
+      {/* Fullscreen Meme Reaction Modal for this story */}
+      {showMemeModal && (
+        <FullscreenMemeModal
+          category={experience.category || "Ghosting"}
+          onClose={() => setShowMemeModal(false)}
+        />
+      )}
 
       {/* Expandable Comments Drawer */}
       {showComments && (

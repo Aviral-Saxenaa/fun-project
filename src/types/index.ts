@@ -13,13 +13,15 @@ export type InterviewOutcome =
   | "Never Responded"
   | "Ghosted After Final Round"
   | "Ghost Job / Fake Listing"
-  | "Rejected";
+  | "Rejected"
+  | "Laid Off / Mass Layoff";
 
 export type ExperienceCategory =
   | "Ghosting"
   | "Zombie Interview"
   | "Infinite Waiting"
   | "Rejected"
+  | "Layoff Shock"
   | "Unpaid Assignment"
   | "Red Flag"
   | "HR Circus";

@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AddCompanyModal } from "@/components/AddCompanyModal";
+import { FullscreenMemeModal } from "@/components/FullscreenMemeModal";
 
 const STAGES: InterviewStage[] = [
   "Applied",
@@ -30,6 +31,7 @@ const STAGES: InterviewStage[] = [
 
 const OUTCOMES: { label: string; value: InterviewOutcome; emoji: string }[] = [
   { label: "Ghosted", value: "Ghosted", emoji: "👻" },
+  { label: "Laid Off / Mass Layoff", value: "Laid Off / Mass Layoff", emoji: "🪓" },
   { label: "Still Waiting", value: "Still Waiting", emoji: "⏳" },
   { label: "Rejected", value: "Rejected", emoji: "🚫" },
   { label: "Never Responded", value: "Never Responded", emoji: "🪦" },
@@ -39,6 +41,7 @@ const OUTCOMES: { label: string; value: InterviewOutcome; emoji: string }[] = [
 
 const CATEGORIES: { label: string; value: ExperienceCategory; emoji: string; desc: string }[] = [
   { label: "Ghosting", value: "Ghosting", emoji: "👻", desc: "Never heard back after promises" },
+  { label: "Layoff Shock", value: "Layoff Shock", emoji: "🪓", desc: "Sudden mass layoff, revoked Slack access" },
   { label: "Zombie Interview", value: "Zombie Interview", emoji: "🧟", desc: "Process refuses to die" },
   { label: "Infinite Waiting", value: "Infinite Waiting", emoji: "⏳", desc: "'We will get back to you soon'" },
   { label: "Rejected", value: "Rejected", emoji: "🚫", desc: "Cold automated rejection or no feedback" },
@@ -85,6 +88,7 @@ function SubmitFormContent() {
   const [polishing, setPolishing] = useState(false);
   const [aiNote, setAiNote] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [showMemePopup, setShowMemePopup] = useState(false);
   const [createdSlug, setCreatedSlug] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
@@ -260,6 +264,7 @@ function SubmitFormContent() {
 
       setCreatedSlug(selectedCompany?.slug || "");
       setSubmitted(true);
+      setShowMemePopup(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to submit story");
     } finally {
@@ -269,7 +274,16 @@ function SubmitFormContent() {
 
   if (submitted) {
     return (
-      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6 bg-zinc-900/90 border border-purple-500/40 rounded-3xl p-8 shadow-2xl">
+      <div className="max-w-xl mx-auto px-4 py-16 text-center space-y-6 bg-zinc-900/90 border border-purple-500/40 rounded-3xl p-8 shadow-2xl relative">
+        {/* Fullscreen Meme Reaction Modal automatically pops up on submit */}
+        {showMemePopup && (
+          <FullscreenMemeModal
+            category={category}
+            onClose={() => setShowMemePopup(false)}
+            autoCloseSec={6}
+          />
+        )}
+
         <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto text-3xl text-emerald-400">
           <CheckCircle2 className="w-8 h-8" />
         </div>
@@ -287,6 +301,12 @@ function SubmitFormContent() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <button
+            onClick={() => setShowMemePopup(true)}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 transition-colors"
+          >
+            😂 Replay Savage Meme Reaction
+          </button>
           {createdSlug && (
             <Link
               href={`/company/${createdSlug}`}

@@ -4,17 +4,17 @@ import React, { useState, useEffect } from "react";
 import { RefreshCw, Flame } from "lucide-react";
 
 export const GHOST_MEMES = [
-  "This company ghosted more candidates than my toxic ex ghosted my texts 👻",
-  "HR said 'We will be in touch Monday'... didn't specify which leap year 💀",
+  "‘We are like a family here’ — Ha, wahi family jo property ke batwaare me baat nahi karti! 🚩",
+  "Sabka katne wala hai: 2040 tak AI will interview AI and layoff AI 🤖",
   "Completed 6 rounds of interviews just for the recruiter to enter witness protection 🪦",
-  "Their Ghosting Score is officially higher than my college GPA 📉",
-  "Faster at firing up AI than sending a 1-sentence polite rejection email 🤖",
+  "HR said 'We will be in touch Monday'... didn't specify which leap year 💀",
+  "Tough market reality: Nyayene rajyam lavdenabhujvam — everyone gets served! 📜",
+  "Slack deactivated at 9:01 AM after receiving 'Top Performer' badge at 8:59 AM 🪓",
+  "Faster at firing 12,000 employees on a 1-minute Zoom call than sending a polite rejection email 📉",
   "Relationship status: Left on Read by 47 Fortune 500 recruiters 💔",
-  "‘We are like a family here’ — yeah, the estranged kind that never speaks to you again 🚩",
-  "Spends 45 minutes asking ‘Where do you see yourself in 5 years?’, vanishes in 5 minutes 🕳️",
-  "Did a 14-hour take-home project; my code is in production, but my recruiter is in Narnia 🧟",
-  "Rejection emails are apparently locked behind a premium DLC subscription 🎮",
+  "Status: 'Under Consideration'. Brother, Gandhi Ji got independence faster than this reply! ⏳",
   "Their ATS didn't just reject me, it dispatched my resume into a black hole 🌌",
+  "Rejection emails are apparently locked behind a premium DLC subscription 🎮",
 ];
 
 export function MemeTicker() {
