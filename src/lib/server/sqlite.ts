@@ -2,20 +2,36 @@ import { createClient } from "@libsql/client";
 import path from "path";
 import { hashAnonymousId } from "./hashing";
 
-const dbUrl = process.env.DATABASE_URL || `file:${path.join(process.cwd(), "ghosted.db")}`;
-const authToken = process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN;
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+const rawDbUrl = process.env.DATABASE_URL?.trim().replace(/^["']|["']$/g, "");
+const rawAuthToken = (process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN)?.trim().replace(/^["']|["']$/g, "");
+
+// If in serverless (e.g. Vercel) and no remote DATABASE_URL provided, fallback to writable /tmp
+const fallbackLocalPath = isServerless ? "file:/tmp/ghosted.db" : `file:${path.join(process.cwd(), "ghosted.db")}`;
+const finalDbUrl = rawDbUrl || fallbackLocalPath;
 
 export const sqlite = createClient({
-  url: dbUrl,
-  ...(authToken ? { authToken } : {}),
+  url: finalDbUrl,
+  ...(rawAuthToken ? { authToken: rawAuthToken } : {}),
 });
 
+export const dbConfigInfo = {
+  isTurso: finalDbUrl.startsWith("libsql://") || finalDbUrl.startsWith("https://"),
+  hasUrl: Boolean(rawDbUrl),
+  hasToken: Boolean(rawAuthToken),
+  urlPreview: rawDbUrl ? (rawDbUrl.startsWith("libsql://") ? rawDbUrl.slice(0, 30) + "..." : "custom-url") : "local-file",
+};
+
 let isInitialized = false;
+let initPromise: Promise<void> | null = null;
 
 export async function ensureDatabase(): Promise<void> {
   if (isInitialized) return;
+  if (initPromise) return initPromise;
 
-  // 1. Create tables
+  initPromise = (async () => {
+    try {
+      // 1. Create tables
   await sqlite.execute(`
     CREATE TABLE IF NOT EXISTS companies (
       id TEXT PRIMARY KEY,
@@ -434,7 +450,15 @@ export async function ensureDatabase(): Promise<void> {
         args: [v.id, v.experience_id, v.hash, new Date().toISOString()],
       });
     }
+    }
+    isInitialized = true;
+  } catch (err) {
+    console.error("Database initialization failed:", err);
+    throw err;
+  } finally {
+    initPromise = null;
   }
+})();
 
-  isInitialized = true;
+  return initPromise;
 }

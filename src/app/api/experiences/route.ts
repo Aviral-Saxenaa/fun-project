@@ -46,10 +46,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(exp);
-  } catch {
+  } catch (err: any) {
+    console.error("POST /api/experiences error:", err);
     return NextResponse.json(
-      { detail: "Invalid request payload" },
-      { status: 400 }
+      { detail: err?.message || "Failed to submit experience" },
+      { status: 500 }
     );
   }
 }
