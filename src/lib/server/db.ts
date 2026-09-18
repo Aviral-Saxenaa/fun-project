@@ -281,24 +281,69 @@ export const db = {
 
   async getLeaderboard(filter: string = "overall", limit = 50): Promise<LeaderboardItem[]> {
     await ensureDatabase();
-    const compRes = await sqlite.execute("SELECT * FROM companies");
+    const [compRes, expsRes] = await Promise.all([
+      sqlite.execute("SELECT * FROM companies"),
+      sqlite.execute(
+        "SELECT company_id, outcome, category, waiting_days, anonymous_id_hash FROM experiences WHERE status = 'active'"
+      ),
+    ]);
+
+    // Group experiences by company_id in memory
+    const expMap = new Map<string, any[]>();
+    for (const r of expsRes.rows) {
+      const cId = String(r.company_id);
+      let list = expMap.get(cId);
+      if (!list) {
+        list = [];
+        expMap.set(cId, list);
+      }
+      list.push(r);
+    }
+
     const board: LeaderboardItem[] = [];
 
     for (const c of compRes.rows) {
       const companyId = String(c.id);
-      const s = await this.getCompanyStats(companyId);
-      if (s.total_reports === 0) continue;
+      const rows = expMap.get(companyId) || [];
+      const total = rows.length;
+      if (total === 0) continue;
 
-      const score = calculateGhostScore(
-        s.ghost_reports,
-        s.total_reports,
-        0,
-        s.unique_reporters
-      );
+      let ghosted = 0;
+      let waitSum = 0;
+      let waitCount = 0;
+      let maxWait = 0;
+      const uniqueReporters = new Set<string>();
+      const categories: Record<string, number> = {};
+
+      for (const r of rows) {
+        const outcome = String(r.outcome || "");
+        const category = String(r.category || "Ghosting");
+        const wait = typeof r.waiting_days === "number" ? r.waiting_days : null;
+        const hash = String(r.anonymous_id_hash || "");
+
+        if (outcome !== "Offered" && outcome !== "Hired") {
+          ghosted++;
+        }
+        if (wait && wait > 0) {
+          waitSum += wait;
+          waitCount++;
+          if (wait > maxWait) maxWait = wait;
+        }
+        if (hash) {
+          uniqueReporters.add(hash);
+        }
+        categories[category] = (categories[category] || 0) + 1;
+      }
+
+      const avgWait = waitCount > 0 ? waitSum / waitCount : 0;
+      const avgWaitingDays = Math.round(avgWait * 10) / 10;
+      const uniqueCount = uniqueReporters.size;
+
+      const score = calculateGhostScore(ghosted, total, 0, uniqueCount);
 
       let topCat = "Ghosting";
       let maxCatCount = 0;
-      for (const [cat, rawCount] of Object.entries(s.categories)) {
+      for (const [cat, rawCount] of Object.entries(categories)) {
         const count = Number(rawCount) || 0;
         if (count > maxCatCount) {
           maxCatCount = count;
@@ -333,9 +378,9 @@ export const db = {
         ghost_score: score,
         ghost_label: getGhostLabel(score),
         ghost_emoji: getGhostEmoji(score),
-        report_count: s.total_reports,
-        ghost_count: s.ghost_reports,
-        avg_waiting_days: s.avg_waiting_days,
+        report_count: total,
+        ghost_count: ghosted,
+        avg_waiting_days: avgWaitingDays,
         rank_change: rankChange,
         rank_shift: rankShift,
         top_category: topCat,
@@ -471,41 +516,32 @@ export const db = {
     await ensureDatabase();
     const hashed = anonymousId ? hashAnonymousId(anonymousId) : null;
 
-    const res = await sqlite.execute({
-      sql: `SELECT e.*, c.name as company_name, c.slug as company_slug
-            FROM experiences e
-            LEFT JOIN companies c ON e.company_id = c.id
-            WHERE e.id = ? AND e.status = 'active'
-            LIMIT 1`,
-      args: [id],
-    });
+    const args: (string | number)[] = [];
+    let userVoteSql = "NULL as user_vote";
+    if (hashed) {
+      userVoteSql = "(SELECT v.vote_type FROM votes v WHERE v.experience_id = e.id AND v.anonymous_id_hash = ? LIMIT 1) as user_vote";
+      args.push(hashed);
+    }
 
+    const sql = `
+      SELECT 
+        e.*, 
+        c.name as company_name, 
+        c.slug as company_slug,
+        (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'up') as up_cnt,
+        (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'down') as down_cnt,
+        (SELECT COUNT(*) FROM comments cm WHERE cm.experience_id = e.id AND cm.status = 'active') as comm_cnt,
+        ${userVoteSql}
+      FROM experiences e
+      LEFT JOIN companies c ON e.company_id = c.id
+      WHERE e.id = ? AND e.status = 'active'
+      LIMIT 1
+    `;
+    args.push(id);
+
+    const res = await sqlite.execute({ sql, args });
     if (res.rows.length === 0) return null;
     const r = res.rows[0];
-
-    const upRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM votes WHERE experience_id = ? AND vote_type = 'up'",
-      args: [id],
-    });
-    const downRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM votes WHERE experience_id = ? AND vote_type = 'down'",
-      args: [id],
-    });
-    const commRes = await sqlite.execute({
-      sql: "SELECT COUNT(*) as cnt FROM comments WHERE experience_id = ? AND status = 'active'",
-      args: [id],
-    });
-
-    let userVote: "up" | "down" | null = null;
-    if (hashed) {
-      const uvRes = await sqlite.execute({
-        sql: "SELECT vote_type FROM votes WHERE experience_id = ? AND anonymous_id_hash = ? LIMIT 1",
-        args: [id, hashed],
-      });
-      if (uvRes.rows.length > 0) {
-        userVote = uvRes.rows[0].vote_type as "up" | "down";
-      }
-    }
 
     const seedNum = id.startsWith("exp-") ? parseInt(id.replace(/\D/g, "") || "0", 10) : 0;
     const baseUp = seedNum > 0 ? 120 + seedNum * 85 : 0;
@@ -524,10 +560,10 @@ export const db = {
       interview_rounds: typeof r.interview_rounds === "number" ? r.interview_rounds : null,
       category: r.category ? String(r.category) : null,
       created_at: String(r.created_at),
-      upvotes: Number(upRes.rows[0]?.cnt || 0) + baseUp,
-      downvotes: Number(downRes.rows[0]?.cnt || 0),
-      comment_count: Number(commRes.rows[0]?.cnt || 0),
-      user_vote: userVote,
+      upvotes: Number(r.up_cnt || 0) + baseUp,
+      downvotes: Number(r.down_cnt || 0),
+      comment_count: Number(r.comm_cnt || 0),
+      user_vote: (r.user_vote as "up" | "down" | null) || null,
       status: (r.status as "active" | "deleted") || "active",
     };
   },
@@ -542,13 +578,27 @@ export const db = {
     await ensureDatabase();
     const hashed = anonymousId ? hashAnonymousId(anonymousId) : null;
 
+    const args: (string | number)[] = [];
+
+    let userVoteSql = "NULL as user_vote";
+    if (hashed) {
+      userVoteSql = "(SELECT v.vote_type FROM votes v WHERE v.experience_id = e.id AND v.anonymous_id_hash = ? LIMIT 1) as user_vote";
+      args.push(hashed);
+    }
+
     let sql = `
-      SELECT e.*, c.name as company_name, c.slug as company_slug
+      SELECT 
+        e.*, 
+        c.name as company_name, 
+        c.slug as company_slug,
+        (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'up') as up_cnt,
+        (SELECT COUNT(*) FROM votes v WHERE v.experience_id = e.id AND v.vote_type = 'down') as down_cnt,
+        (SELECT COUNT(*) FROM comments cm WHERE cm.experience_id = e.id AND cm.status = 'active') as comm_cnt,
+        ${userVoteSql}
       FROM experiences e
       LEFT JOIN companies c ON e.company_id = c.id
       WHERE e.status = 'active'
     `;
-    const args: (string | number)[] = [];
 
     if (companyId) {
       sql += " AND e.company_id = ?";
@@ -563,39 +613,13 @@ export const db = {
     args.push(limit, offset);
 
     const res = await sqlite.execute({ sql, args });
-    const experiences: Experience[] = [];
 
-    for (const r of res.rows) {
+    return res.rows.map((r) => {
       const expId = String(r.id);
-
-      const upRes = await sqlite.execute({
-        sql: "SELECT COUNT(*) as cnt FROM votes WHERE experience_id = ? AND vote_type = 'up'",
-        args: [expId],
-      });
-      const downRes = await sqlite.execute({
-        sql: "SELECT COUNT(*) as cnt FROM votes WHERE experience_id = ? AND vote_type = 'down'",
-        args: [expId],
-      });
-      const commRes = await sqlite.execute({
-        sql: "SELECT COUNT(*) as cnt FROM comments WHERE experience_id = ? AND status = 'active'",
-        args: [expId],
-      });
-
-      let userVote: "up" | "down" | null = null;
-      if (hashed) {
-        const uvRes = await sqlite.execute({
-          sql: "SELECT vote_type FROM votes WHERE experience_id = ? AND anonymous_id_hash = ? LIMIT 1",
-          args: [expId, hashed],
-        });
-        if (uvRes.rows.length > 0) {
-          userVote = uvRes.rows[0].vote_type as "up" | "down";
-        }
-      }
-
       const seedNum = expId.startsWith("exp-") ? parseInt(expId.replace(/\D/g, "") || "0", 10) : 0;
       const baseUp = seedNum > 0 ? 120 + seedNum * 85 : 0;
 
-      experiences.push({
+      return {
         id: expId,
         company_id: String(r.company_id),
         company_name: r.company_name ? String(r.company_name) : "Unknown Company",
@@ -609,15 +633,13 @@ export const db = {
         interview_rounds: typeof r.interview_rounds === "number" ? r.interview_rounds : null,
         category: r.category ? String(r.category) : null,
         created_at: String(r.created_at),
-        upvotes: Number(upRes.rows[0]?.cnt || 0) + baseUp,
-        downvotes: Number(downRes.rows[0]?.cnt || 0),
-        comment_count: Number(commRes.rows[0]?.cnt || 0),
-        user_vote: userVote,
+        upvotes: Number(r.up_cnt || 0) + baseUp,
+        downvotes: Number(r.down_cnt || 0),
+        comment_count: Number(r.comm_cnt || 0),
+        user_vote: (r.user_vote as "up" | "down" | null) || null,
         status: (r.status as "active" | "deleted") || "active",
-      });
-    }
-
-    return experiences;
+      };
+    });
   },
 
   async deleteExperience(experienceId: string): Promise<boolean> {

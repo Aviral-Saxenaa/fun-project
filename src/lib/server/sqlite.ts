@@ -31,73 +31,78 @@ export async function ensureDatabase(): Promise<void> {
 
   initPromise = (async () => {
     try {
-      // 1. Create tables
-  await sqlite.execute(`
-    CREATE TABLE IF NOT EXISTS companies (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      slug TEXT UNIQUE NOT NULL,
-      website TEXT,
-      domain TEXT,
-      logo_url TEXT,
-      meme_punchline TEXT,
-      industry TEXT,
-      created_at TEXT NOT NULL
-    );
-  `);
+      // 0. Fast-path check: if companies table already exists with data, skip DDL overhead
+      try {
+        const quick = await sqlite.execute("SELECT COUNT(*) as count FROM companies");
+        const count = Number(quick.rows[0]?.count ?? 0);
+        if (count > 0) {
+          isInitialized = true;
+          return;
+        }
+      } catch {
+        // Tables do not exist yet; proceed with table creation and seeding
+      }
 
-  await sqlite.execute(`
-    CREATE TABLE IF NOT EXISTS experiences (
-      id TEXT PRIMARY KEY,
-      company_id TEXT NOT NULL REFERENCES companies(id),
-      anonymous_id_hash TEXT NOT NULL,
-      interview_stage TEXT NOT NULL,
-      outcome TEXT NOT NULL,
-      content TEXT NOT NULL,
-      waiting_days INTEGER,
-      interview_rounds INTEGER,
-      category TEXT,
-      created_at TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'active'
-    );
-  `);
+      // 1. Create tables and indices in batch (single roundtrip)
+      await sqlite.batch([
+        `CREATE TABLE IF NOT EXISTS companies (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          slug TEXT UNIQUE NOT NULL,
+          website TEXT,
+          domain TEXT,
+          logo_url TEXT,
+          meme_punchline TEXT,
+          industry TEXT,
+          created_at TEXT NOT NULL
+        );`,
+        `CREATE TABLE IF NOT EXISTS experiences (
+          id TEXT PRIMARY KEY,
+          company_id TEXT NOT NULL REFERENCES companies(id),
+          anonymous_id_hash TEXT NOT NULL,
+          interview_stage TEXT NOT NULL,
+          outcome TEXT NOT NULL,
+          content TEXT NOT NULL,
+          waiting_days INTEGER,
+          interview_rounds INTEGER,
+          category TEXT,
+          created_at TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active'
+        );`,
+        `CREATE TABLE IF NOT EXISTS comments (
+          id TEXT PRIMARY KEY,
+          experience_id TEXT NOT NULL REFERENCES experiences(id),
+          anonymous_id_hash TEXT NOT NULL,
+          content TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active'
+        );`,
+        `CREATE TABLE IF NOT EXISTS votes (
+          id TEXT PRIMARY KEY,
+          experience_id TEXT NOT NULL REFERENCES experiences(id),
+          anonymous_id_hash TEXT NOT NULL,
+          vote_type TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          UNIQUE(experience_id, anonymous_id_hash)
+        );`,
+        `CREATE TABLE IF NOT EXISTS comment_votes (
+          id TEXT PRIMARY KEY,
+          comment_id TEXT NOT NULL REFERENCES comments(id),
+          anonymous_id_hash TEXT NOT NULL,
+          vote_type TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          UNIQUE(comment_id, anonymous_id_hash)
+        );`,
+        `CREATE INDEX IF NOT EXISTS idx_exp_active_created ON experiences(status, created_at DESC);`,
+        `CREATE INDEX IF NOT EXISTS idx_exp_company ON experiences(company_id, status);`,
+        `CREATE INDEX IF NOT EXISTS idx_votes_exp ON votes(experience_id, vote_type);`,
+        `CREATE INDEX IF NOT EXISTS idx_votes_user ON votes(experience_id, anonymous_id_hash);`,
+        `CREATE INDEX IF NOT EXISTS idx_comm_exp ON comments(experience_id, status);`
+      ]);
 
-  await sqlite.execute(`
-    CREATE TABLE IF NOT EXISTS comments (
-      id TEXT PRIMARY KEY,
-      experience_id TEXT NOT NULL REFERENCES experiences(id),
-      anonymous_id_hash TEXT NOT NULL,
-      content TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'active'
-    );
-  `);
-
-  await sqlite.execute(`
-    CREATE TABLE IF NOT EXISTS votes (
-      id TEXT PRIMARY KEY,
-      experience_id TEXT NOT NULL REFERENCES experiences(id),
-      anonymous_id_hash TEXT NOT NULL,
-      vote_type TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      UNIQUE(experience_id, anonymous_id_hash)
-    );
-  `);
-
-  await sqlite.execute(`
-    CREATE TABLE IF NOT EXISTS comment_votes (
-      id TEXT PRIMARY KEY,
-      comment_id TEXT NOT NULL REFERENCES comments(id),
-      anonymous_id_hash TEXT NOT NULL,
-      vote_type TEXT NOT NULL,
-      created_at TEXT NOT NULL,
-      UNIQUE(comment_id, anonymous_id_hash)
-    );
-  `);
-
-  // 2. Check if seeded
-  const check = await sqlite.execute("SELECT COUNT(*) as count FROM companies");
-  const count = Number(check.rows[0]?.count ?? 0);
+      // 2. Check if seeded
+      const check = await sqlite.execute("SELECT COUNT(*) as count FROM companies");
+      const count = Number(check.rows[0]?.count ?? 0);
 
   if (count === 0) {
     console.log("Seeding SQLite database with initial companies and experiences...");
