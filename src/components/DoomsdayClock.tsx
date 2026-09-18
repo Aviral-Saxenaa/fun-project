@@ -65,15 +65,15 @@ export function DoomsdayClock() {
                 ⏳
               </div>
               <div className="text-left min-w-0">
-                <div className="flex flex-wrap items-center gap-1.5 mb-0.5">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-mono font-black uppercase bg-red-950/80 border border-red-500/50 text-red-300 animate-pulse">
+                <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-black uppercase bg-red-950/80 border border-red-500/50 text-red-300 animate-pulse">
                     🔥 2040 REVERSE TICKER
                   </span>
-                  <span className="text-xs font-bold text-amber-400">
+                  <span className="text-sm sm:text-base font-bold text-amber-400">
                     सबका कटने वाला है 💀
                   </span>
                 </div>
-                <h4 className="text-xs sm:text-base font-black text-white truncate">
+                <h4 className="text-sm sm:text-lg font-black text-white truncate">
                   <span>&ldquo;न्यायेन राज्यं लवण्डेन भुज्यते&rdquo;</span>
                 </h4>
               </div>
@@ -82,56 +82,56 @@ export function DoomsdayClock() {
             {/* Collapse button for mobile top-right */}
             <button
               onClick={() => setCollapsed(true)}
-              className="md:hidden text-zinc-500 hover:text-zinc-300 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors shrink-0"
+              className="md:hidden text-zinc-400 hover:text-zinc-200 p-2 rounded-lg hover:bg-zinc-800 transition-colors shrink-0"
               title="Minimize clock"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Realtime Countdown Blocks (No API load, pure client math) */}
-          <div className="flex items-center justify-center gap-1 sm:gap-2 font-mono w-full md:w-auto">
-            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 text-center min-w-[42px] sm:min-w-[50px] flex-1 sm:flex-initial">
-              <div className="text-base sm:text-xl font-black text-amber-400 leading-tight">
+          <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 font-mono w-full md:w-auto">
+            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-center min-w-[46px] sm:min-w-[56px] flex-1 sm:flex-initial shadow-inner">
+              <div className="text-lg sm:text-2xl font-black text-amber-400 leading-tight">
                 {timeLeft.years}
               </div>
-              <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">Yrs</div>
+              <div className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-300 font-bold">Yrs</div>
             </div>
 
-            <span className="text-amber-500/60 font-bold text-xs sm:text-base">:</span>
+            <span className="text-amber-500/60 font-bold text-sm sm:text-lg">:</span>
 
-            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 text-center min-w-[42px] sm:min-w-[50px] flex-1 sm:flex-initial">
-              <div className="text-base sm:text-xl font-black text-amber-300 leading-tight">
+            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-center min-w-[46px] sm:min-w-[56px] flex-1 sm:flex-initial shadow-inner">
+              <div className="text-lg sm:text-2xl font-black text-amber-300 leading-tight">
                 {String(timeLeft.days).padStart(2, "0")}
               </div>
-              <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">Days</div>
+              <div className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-300 font-bold">Days</div>
             </div>
 
-            <span className="text-amber-500/60 font-bold text-xs sm:text-base">:</span>
+            <span className="text-amber-500/60 font-bold text-sm sm:text-lg">:</span>
 
-            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 text-center min-w-[42px] sm:min-w-[50px] flex-1 sm:flex-initial">
-              <div className="text-base sm:text-xl font-black text-amber-200 leading-tight">
+            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-center min-w-[46px] sm:min-w-[56px] flex-1 sm:flex-initial shadow-inner">
+              <div className="text-lg sm:text-2xl font-black text-amber-200 leading-tight">
                 {String(timeLeft.hours).padStart(2, "0")}
               </div>
-              <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">Hrs</div>
+              <div className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-300 font-bold">Hrs</div>
             </div>
 
-            <span className="text-amber-500/60 font-bold text-xs sm:text-base">:</span>
+            <span className="text-amber-500/60 font-bold text-sm sm:text-lg">:</span>
 
-            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 text-center min-w-[42px] sm:min-w-[50px] flex-1 sm:flex-initial">
-              <div className="text-base sm:text-xl font-black text-amber-100 leading-tight">
+            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-center min-w-[46px] sm:min-w-[56px] flex-1 sm:flex-initial shadow-inner">
+              <div className="text-lg sm:text-2xl font-black text-amber-100 leading-tight">
                 {String(timeLeft.minutes).padStart(2, "0")}
               </div>
-              <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">Min</div>
+              <div className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-300 font-bold">Min</div>
             </div>
 
-            <span className="text-amber-500/60 font-bold text-xs sm:text-base">:</span>
+            <span className="text-amber-500/60 font-bold text-sm sm:text-lg">:</span>
 
-            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2 sm:px-2.5 py-1 sm:py-1.5 text-center min-w-[42px] sm:min-w-[50px] flex-1 sm:flex-initial">
-              <div className="text-base sm:text-xl font-black text-red-400 leading-tight">
+            <div className="bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-center min-w-[46px] sm:min-w-[56px] flex-1 sm:flex-initial shadow-inner">
+              <div className="text-lg sm:text-2xl font-black text-red-400 leading-tight">
                 {String(timeLeft.seconds).padStart(2, "0")}
               </div>
-              <div className="text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">Sec</div>
+              <div className="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-300 font-bold">Sec</div>
             </div>
 
             {/* Desktop collapse button */}

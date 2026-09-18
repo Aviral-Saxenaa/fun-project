@@ -56,27 +56,27 @@ export default function LeaderboardPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       {/* Header */}
-      <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold">
-          <Trophy className="w-3.5 h-3.5" />
+      <div className="text-center space-y-3.5 max-w-3xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs sm:text-sm font-bold">
+          <Trophy className="w-4 h-4 text-amber-400" />
           <span>OFFICIAL COMMUNITY RANKINGS</span>
         </div>
 
-        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight">
           🏆 THE GHOST LEADERBOARD
         </h1>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 text-base sm:text-xl font-bold">
+        <div className="flex flex-wrap items-center justify-center gap-2 text-lg sm:text-2xl font-bold">
           <span className="line-through decoration-zinc-500/80 decoration-2 text-zinc-400">
             &ldquo;we keep your profile in our active talent pool&rdquo;
           </span>
-          <span className="text-rose-400 underline decoration-rose-500/40">
+          <span className="text-rose-400 underline decoration-rose-500/40 font-black">
             GHOSTED 👻
           </span>
         </div>
 
-        <p className="text-xs text-zinc-400 italic">
-          Hall of Fame for corporate radio silence &amp; vanishing recruiters.
+        <p className="text-sm sm:text-base text-zinc-300 italic">
+          Hall of Fame for corporate radio silence, 8-round marathons &amp; vanishing recruiters.
         </p>
       </div>
 
@@ -88,10 +88,10 @@ export default function LeaderboardPage() {
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+              className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                 filter === f.value
                   ? "bg-purple-600 text-white shadow-lg shadow-purple-950/60"
-                  : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+                  : "bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800"
               }`}
             >
               {f.label}
@@ -101,29 +101,29 @@ export default function LeaderboardPage() {
 
         {/* Search inside leaderboard & Add Company CTA */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-3" />
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-3.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter ranking..."
-              className="w-full pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500"
+              placeholder="Search company or industry..."
+              className="w-full pl-10 pr-3.5 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-900 border border-zinc-800 text-purple-300 hover:bg-zinc-800 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-zinc-900 border border-zinc-800 text-purple-300 hover:bg-zinc-800 hover:text-purple-200 transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
               <span>Add Unlisted Ghost</span>
             </button>
 
             <Link
               href="/submit"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white transition-colors shadow-md"
             >
               <span>Submit Story</span>
             </Link>
@@ -216,41 +216,41 @@ export default function LeaderboardPage() {
                         <img
                           src={item.logo_url}
                           alt=""
-                          className="w-7 h-7 rounded-lg bg-zinc-900 object-contain p-0.5 border border-zinc-700 shrink-0"
+                          className="w-8 h-8 rounded-lg bg-zinc-900 object-contain p-0.5 border border-zinc-700 shrink-0"
                           onError={(e) => {
                             (e.target as HTMLElement).style.display = "none";
                           }}
                         />
                       ) : null}
 
-                      <span className="font-bold text-base sm:text-lg text-white group-hover:text-purple-300 transition-colors">
+                      <span className="font-black text-lg sm:text-xl text-white group-hover:text-purple-300 transition-colors">
                         {item.name}
                       </span>
                       {item.top_category && (
-                        <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-zinc-950 border border-zinc-800 text-zinc-400">
+                        <span className="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-zinc-950 border border-zinc-800 text-zinc-300">
                           {item.top_category}
                         </span>
                       )}
                     </div>
 
                     {item.meme_punchline && (
-                      <div className="text-xs text-purple-300/80 italic line-clamp-1">
+                      <div className="text-sm text-purple-300 font-medium italic line-clamp-1">
                         &ldquo;{item.meme_punchline}&rdquo;
                       </div>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
+                    <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-zinc-300">
                       {item.industry && (
-                        <span className="flex items-center gap-1">
-                          <Briefcase className="w-3 h-3 text-zinc-500" />
+                        <span className="flex items-center gap-1.5">
+                          <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
                           {item.industry}
                         </span>
                       )}
-                      <span className="font-mono text-zinc-300 font-semibold">
+                      <span className="font-mono text-purple-300 font-bold">
                         {item.report_count} {item.report_count === 1 ? "report" : "reports"}
                       </span>
                       {item.avg_waiting_days > 0 && (
-                        <span className="hidden sm:inline font-mono text-zinc-500">
+                        <span className="hidden sm:inline font-mono text-zinc-400">
                           • avg wait {item.avg_waiting_days}d
                         </span>
                       )}

@@ -142,15 +142,15 @@ export default function CompanyDetailPage() {
             </div>
 
             {company.meme_punchline && (
-              <div className="p-2.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-xs sm:text-sm font-medium text-purple-200 italic max-w-xl">
+              <div className="p-3 rounded-xl bg-purple-950/40 border border-purple-900/50 text-sm sm:text-base font-medium text-purple-200 italic max-w-xl">
                 &ldquo;{company.meme_punchline}&rdquo; 👻
               </div>
             )}
 
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-zinc-400">
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs sm:text-sm text-zinc-300">
               {company.industry && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300">
-                  <Briefcase className="w-3 h-3 text-zinc-500" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200">
+                  <Briefcase className="w-3.5 h-3.5 text-zinc-400" />
                   {company.industry}
                 </span>
               )}
@@ -159,18 +159,18 @@ export default function CompanyDetailPage() {
                   href={company.website.startsWith("http") ? company.website : `https://${company.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-950 border border-zinc-800 text-purple-400 hover:text-purple-300 hover:border-purple-500/50 transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 border border-zinc-800 text-purple-300 hover:text-white hover:border-purple-500/50 transition-colors"
                 >
-                  <Globe className="w-3 h-3" />
+                  <Globe className="w-3.5 h-3.5" />
                   <span>Website</span>
                 </a>
               )}
             </div>
 
             {/* Disclaimer pill */}
-            <div className="pt-2 flex items-center gap-1.5 text-[11px] text-zinc-400 font-mono">
-              <AlertTriangle className="w-3 h-3 text-amber-500/80 shrink-0" />
-              <span>Based on anonymous community reports. Not official corporate metrics.</span>
+            <div className="pt-2 flex items-center gap-2 text-xs text-zinc-400 font-mono">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500/80 shrink-0" />
+              <span>Based on anonymous candidate reports. 100% candid community signal.</span>
             </div>
           </div>
 
