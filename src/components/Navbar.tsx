@@ -42,6 +42,15 @@ export function Navbar() {
               <span>Leaderboard</span>
             </Link>
 
+            <Link
+              id="nav-stories-link"
+              href="/stories"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-300 hover:text-white hover:bg-zinc-900 transition-colors"
+            >
+              <span className="text-sm">🗄️</span>
+              <span>Stories Vault</span>
+            </Link>
+
             <button
               id="nav-add-company-btn"
               onClick={() => setShowAddCompanyModal(true)}
@@ -96,6 +105,14 @@ export function Navbar() {
             >
               <Trophy className="w-4 h-4 text-amber-400" />
               <span>Ghost Leaderboard</span>
+            </Link>
+            <Link
+              href="/stories"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-zinc-200 hover:bg-zinc-900"
+            >
+              <span className="text-sm">🗄️</span>
+              <span>Stories Vault & 3D Radar</span>
             </Link>
             <button
               onClick={() => {

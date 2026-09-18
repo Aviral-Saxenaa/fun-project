@@ -33,6 +33,8 @@ const CATEGORIES: { label: string; value: ExperienceCategory | "all"; emoji: str
   { label: "Red Flag", value: "Red Flag", emoji: "🚩" },
 ];
 
+const MAX_LANDING_STORIES = 4;
+
 export default function HomePage() {
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [trending, setTrending] = useState<LeaderboardItem[]>([]);
@@ -40,38 +42,49 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<ExperienceCategory | "all">("all");
   const [loadingExps, setLoadingExps] = useState(true);
 
+  // Fast Concurrent Loading: Stats & Trending load in parallel
   useEffect(() => {
-    async function loadStatsAndTrending() {
-      try {
-        const [statData, board] = await Promise.all([
-          api.getPlatformStats(),
-          api.getLeaderboard("trending"),
-        ]);
-        setStats(statData);
-        setTrending(board.slice(0, 3));
-      } catch (e) {
-        console.error("Failed to load homepage stats", e);
-      }
-    }
-    loadStatsAndTrending();
+    let isCancelled = false;
+
+    api.getPlatformStats()
+      .then((data) => {
+        if (!isCancelled) setStats(data);
+      })
+      .catch((err) => console.error("Stats load error:", err));
+
+    api.getLeaderboard("trending")
+      .then((board) => {
+        if (!isCancelled) setTrending(board.slice(0, 3));
+      })
+      .catch((err) => console.error("Trending load error:", err));
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
+  // Fast Yield/Category loading: strictly loads top 4 for landing page
   useEffect(() => {
-    async function loadExperiences() {
-      setLoadingExps(true);
-      try {
-        const exps = await api.getExperiences({
-          category: selectedCategory === "all" ? undefined : selectedCategory,
-          limit: 10,
-        });
-        setExperiences(exps);
-      } catch (e) {
-        console.error("Failed to load experiences", e);
-      } finally {
-        setLoadingExps(false);
-      }
-    }
-    loadExperiences();
+    let isCancelled = false;
+    setLoadingExps(true);
+
+    api.getExperiences({
+      category: selectedCategory === "all" ? undefined : selectedCategory,
+      limit: MAX_LANDING_STORIES,
+    })
+      .then((exps) => {
+        if (!isCancelled) {
+          setExperiences(exps);
+        }
+      })
+      .catch((e) => console.error("Failed to load experiences", e))
+      .finally(() => {
+        if (!isCancelled) setLoadingExps(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedCategory]);
 
   return (
@@ -315,9 +328,25 @@ export default function HomePage() {
 
         {/* Stories List */}
         {loadingExps ? (
-          <div className="p-12 text-center text-sm text-zinc-400 space-y-3">
-            <Loader2 className="w-6 h-6 animate-spin text-purple-400 mx-auto" />
-            <p className="font-mono text-xs">Waiting for HR to reply... ⏳</p>
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 animate-pulse space-y-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-zinc-800" />
+                  <div className="space-y-1.5">
+                    <div className="w-32 h-3.5 bg-zinc-800 rounded" />
+                    <div className="w-20 h-2.5 bg-zinc-800 rounded" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="w-full h-3 bg-zinc-800 rounded" />
+                  <div className="w-4/5 h-3 bg-zinc-800 rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : experiences.length === 0 ? (
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-10 text-center space-y-4">
@@ -339,6 +368,38 @@ export default function HomePage() {
             {experiences.map((exp) => (
               <ExperienceCard key={exp.id} experience={exp} showCompany={true} />
             ))}
+
+            {/* Teaser & Link to Dedicated Stories Archive Page */}
+            <div className="pt-2">
+              <div className="relative rounded-2xl bg-gradient-to-r from-purple-950/40 via-zinc-900 to-purple-950/40 border border-purple-500/30 p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+                <div className="flex items-center gap-4 text-center sm:text-left">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-2xl shrink-0">
+                    🗄️
+                  </div>
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold text-purple-300 uppercase tracking-wider mb-0.5">
+                      <Sparkles className="w-3 h-3 text-purple-400" />
+                      <span>And Many More Stories In The Vault</span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-white">
+                      Looking for more candidate experiences?
+                    </h3>
+                    <p className="text-xs text-zinc-400 max-w-md">
+                      Explore all verified stories with custom stage filters, upvote sorting, and our 3D Ghost Radar.
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  id="explore-all-stories-btn"
+                  href={`/stories${selectedCategory !== "all" ? `?category=${selectedCategory}` : ""}`}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/80 whitespace-nowrap transition-all hover:scale-105 shrink-0"
+                >
+                  <span>Explore Full Archive & 3D Radar</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
           </div>
         )}
       </section>
