@@ -45,31 +45,12 @@ export async function POST(request: Request) {
     }
 
     const rawText = text.trim();
-    const apiKey = process.env.GEMINI_API_KEY;
+    const grokKey = process.env.GROK_API_KEY || process.env.XAI_API_KEY;
+    const geminiKey = process.env.GEMINI_API_KEY;
 
-    if (!apiKey) {
-      // Graceful local corporate civilizer fallback
-      const civilized = fallbackCivilize(rawText);
-      return NextResponse.json({
-        civilized,
-        method: "local_corporate_filter",
-        pun: "Refined with local corporate euphemism engine",
-      });
-    }
-
-    const ai = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
-    });
-
-    const prompt = `You are the Ghosted AI Civility Translator. You convert angry, raw, frustrating, or vulgar candidate reviews into devastatingly sharp, articulate, witty, and 100% clean/professional corporate burns.
+    const systemPrompt = `You are the Ghosted Corporate Translator. You convert angry, raw, frustrating, or vulgar candidate reviews into devastatingly sharp, articulate, witty, and 100% clean professional corporate burns.
 
 Target Company: ${companyName || "The Company"}
-Raw Candidate Rant: "${rawText}"
 
 STRICT INSTRUCTIONS:
 1. Completely eradicate any vulgarity, profanity, swear words, slurs, or aggressive abuse.
@@ -78,24 +59,92 @@ STRICT INSTRUCTIONS:
 4. Maintain a hilarious, relatable, savagely civilized tone suitable for public internet discourse.
 5. Return ONLY the polished review text. Do not include markdown quotes, introductory labels like "Here is...", or conversational chit-chat.`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: prompt,
-    });
+    // 1. Prioritize GROK_API_KEY
+    if (grokKey) {
+      try {
+        const grokRes = await fetch("https://api.x.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${grokKey.trim()}`,
+          },
+          body: JSON.stringify({
+            model: "grok-2-latest",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `Raw Candidate Review: "${rawText}"` },
+            ],
+            temperature: 0.6,
+          }),
+        });
 
-    const generated = response.text?.trim() || fallbackCivilize(rawText);
+        if (grokRes.ok) {
+          const grokData = await grokRes.json();
+          const grokText = grokData.choices?.[0]?.message?.content?.trim();
+          if (grokText) {
+            return NextResponse.json({
+              sanitized: grokText,
+              civilized: grokText,
+              explanation: "Refined with Grok AI into sharp corporate satire! ⚡",
+              method: "grok-2-latest",
+              detected_raw_length: rawText.length,
+            });
+          }
+        } else {
+          console.warn("Grok API response not ok:", grokRes.status, await grokRes.text().catch(() => ""));
+        }
+      } catch (grokErr) {
+        console.error("Grok API call failed, attempting fallback:", grokErr);
+      }
+    }
 
+    // 2. Fallback to Gemini if configured
+    if (geminiKey) {
+      try {
+        const ai = new GoogleGenAI({
+          apiKey: geminiKey,
+          httpOptions: {
+            headers: {
+              "User-Agent": "aistudio-build",
+            },
+          },
+        });
+
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: `${systemPrompt}\n\nCandidate Review:\n"${rawText}"`,
+        });
+
+        const generated = response.text?.trim();
+        if (generated) {
+          return NextResponse.json({
+            sanitized: generated,
+            civilized: generated,
+            explanation: "Refined with AI into sharp corporate satire! ✨",
+            method: "gemini-flash",
+            detected_raw_length: rawText.length,
+          });
+        }
+      } catch (geminiErr) {
+        console.error("Gemini API fallback error:", geminiErr);
+      }
+    }
+
+    // 3. Graceful corporate euphemism engine fallback
+    const civilized = fallbackCivilize(rawText);
     return NextResponse.json({
-      civilized: generated,
-      method: "gemini-3.8-flash",
+      sanitized: civilized,
+      civilized,
+      explanation: "Refined with local corporate euphemism engine",
+      method: "local_corporate_filter",
       detected_raw_length: rawText.length,
     });
   } catch (err) {
-    console.error("Gemini civilize error:", err);
-    // On error, fall back gracefully to local rephraser
-    const { text } = await request.clone().json().catch(() => ({ text: "" }));
+    console.error("Civilize endpoint error:", err);
     return NextResponse.json({
-      civilized: fallbackCivilize(text || ""),
+      sanitized: fallbackCivilize("Interview experience submitted"),
+      civilized: fallbackCivilize("Interview experience submitted"),
+      explanation: "Transformed with corporate euphemism fallback engine",
       method: "fallback_recovery",
     });
   }

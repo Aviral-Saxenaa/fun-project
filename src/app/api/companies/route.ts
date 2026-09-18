@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q")?.trim() || "";
 
-    const companies = db.searchCompanies(q, 20);
+    const companies = await db.searchCompanies(q, 20);
     return NextResponse.json(companies);
 }
 
@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
         }
 
         const industry = typeof body.industry === "string" ? body.industry.trim() : undefined;
-        const preexisting = db.getCompanyBySlug(generateSlug(name));
-        const company = db.createCompany(name, website || undefined, industry);
+        const preexisting = await db.getCompanyBySlug(generateSlug(name));
+        const company = await db.createCompany(name, website || undefined, industry);
 
         return NextResponse.json(company, {
             status: preexisting ? 200 : 201,

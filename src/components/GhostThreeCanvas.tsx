@@ -18,11 +18,14 @@ export function GhostThreeCanvas() {
       return; // Graceful exit if WebGL disabled
     }
 
+    const width = container.clientWidth || 300;
+    const height = container.clientHeight || 240;
+
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.set(0, 0, 8);
 
-    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = false;
     container.appendChild(renderer.domElement);
@@ -185,15 +188,38 @@ export function GhostThreeCanvas() {
     let currentX = 0;
     let currentY = 0;
 
+    // Interactive spin on click/tap
+    let spinAngle = 0;
+    let spinVelocity = 0;
+
     const handleMouseMove = (e: MouseEvent) => {
       const rect = container.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
       targetX = x * 1.2;
       targetY = y * 0.8;
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = container.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -(((touch.clientY - rect.top) / rect.height) * 2 - 1);
+        targetX = x * 1.2;
+        targetY = y * 0.8;
+      }
+    };
+
+    const handleClick = () => {
+      spinVelocity = Math.PI * 4;
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    container.addEventListener("click", handleClick);
 
     // Animation Loop
     let animationId: number;
@@ -207,12 +233,20 @@ export function GhostThreeCanvas() {
       currentX += (targetX - currentX) * 0.06;
       currentY += (targetY - currentY) * 0.06;
 
+      // Handle spin impulse
+      if (Math.abs(spinVelocity) > 0.01) {
+        spinAngle += spinVelocity * 0.05;
+        spinVelocity *= 0.93;
+      } else {
+        spinVelocity = 0;
+      }
+
       // Primary Ghost Floating Sine Wave
       ghostGroup.position.y = Math.sin(elapsedTime * 1.8) * 0.35 + currentY * 0.5;
       ghostGroup.position.x = Math.cos(elapsedTime * 0.9) * 0.2 + currentX * 0.8;
 
-      // Ghost subtle look rotation & tilt
-      ghostGroup.rotation.y = currentX * 0.6 + Math.sin(elapsedTime * 0.8) * 0.08;
+      // Ghost subtle look rotation & tilt + spin reaction
+      ghostGroup.rotation.y = currentX * 0.6 + Math.sin(elapsedTime * 0.8) * 0.08 + spinAngle;
       ghostGroup.rotation.x = -currentY * 0.3 + Math.sin(elapsedTime * 1.4) * 0.05;
       ghostGroup.rotation.z = Math.sin(elapsedTime * 1.2) * 0.05 - currentX * 0.15;
 
@@ -257,6 +291,8 @@ export function GhostThreeCanvas() {
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
+      container.removeEventListener("click", handleClick);
       cancelAnimationFrame(animationId);
       resizeObserver.disconnect();
       if (container.contains(renderer.domElement)) {
@@ -270,8 +306,8 @@ export function GhostThreeCanvas() {
     <div
       ref={containerRef}
       id="ghost-three-canvas"
-      aria-hidden="true"
-      className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-hidden"
+      aria-label="Interactive 3D Ghost mascot"
+      className="w-full h-full cursor-grab active:cursor-grabbing select-none overflow-hidden"
     />
   );
 }

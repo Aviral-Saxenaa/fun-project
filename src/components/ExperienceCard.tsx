@@ -10,14 +10,12 @@ import {
   ArrowBigDown,
   MessageSquare,
   Share2,
-  Flag,
   Clock,
   Briefcase,
   Layers,
   Check,
 } from "lucide-react";
 import { CommentSection } from "./CommentSection";
-import { ReportModal } from "./ReportModal";
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -31,7 +29,6 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
     experience.user_vote || null
   );
   const [showComments, setShowComments] = useState(false);
-  const [showReportModal, setShowReportModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const authorName =
@@ -248,17 +245,6 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
           >
             {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
           </button>
-
-          {/* Report */}
-          <button
-            id={`report-btn-${experience.id}`}
-            onClick={() => setShowReportModal(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs text-zinc-500 hover:text-rose-400 hover:bg-rose-950/20 transition-colors"
-            title="Report this story"
-          >
-            <Flag className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Report</span>
-          </button>
         </div>
       </div>
 
@@ -267,16 +253,6 @@ export function ExperienceCard({ experience, showCompany = true }: ExperienceCar
         <CommentSection
           experienceId={experience.id}
           initialCount={experience.comment_count}
-        />
-      )}
-
-      {/* Report Modal */}
-      {showReportModal && (
-        <ReportModal
-          isOpen={showReportModal}
-          onClose={() => setShowReportModal(false)}
-          experienceId={experience.id}
-          itemDescription={experience.content}
         />
       )}
     </div>

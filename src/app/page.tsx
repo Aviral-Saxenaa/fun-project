@@ -82,8 +82,11 @@ export default function HomePage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
 
         {/* 3D Three.js Interactive Mascot Canvas */}
-        <div className="mb-4">
+        <div className="relative w-full max-w-md h-64 sm:h-72 mx-auto mb-2 flex flex-col items-center justify-center">
           <GhostThreeCanvas />
+          <div className="text-[11px] font-mono text-purple-300/60 mt-1 pointer-events-none select-none">
+            ✨ Interactive 3D Mascot • Move mouse to steer, click to spin
+          </div>
         </div>
 
         {/* Title & Taglines */}

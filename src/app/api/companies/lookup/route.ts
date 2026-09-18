@@ -188,17 +188,17 @@ export async function GET(request: Request) {
     const logoUrl = `https://unavatar.io/${domain}?fallback=https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 
     // If auto_add requested, register in database immediately if not present
-    let existingInDb = db.getCompanyBySlug(cleanAlphanumeric);
+    let existingInDb = await db.getCompanyBySlug(cleanAlphanumeric);
     if (!existingInDb) {
-      const searchDb = db.searchCompanies(query, 1);
+      const searchDb = await db.searchCompanies(query, 1);
       if (searchDb.length > 0 && searchDb[0].name.toLowerCase() === displayName.toLowerCase()) {
-        existingInDb = db.getCompanyById(searchDb[0].id);
+        existingInDb = await db.getCompanyById(searchDb[0].id);
       }
     }
 
     let createdOrExisting = existingInDb;
     if (autoAdd && !existingInDb) {
-      createdOrExisting = db.createCompany(
+      createdOrExisting = await db.createCompany(
         displayName,
         `https://${domain}`,
         industry,

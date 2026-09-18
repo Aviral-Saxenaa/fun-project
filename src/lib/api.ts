@@ -160,43 +160,4 @@ export const api = {
     if (!res.ok) throw new Error("Failed to vote on comment");
     return res.json();
   },
-
-  async reportContent(data: {
-    reason: string;
-    experience_id?: string;
-    comment_id?: string;
-  }): Promise<{ id: string; status: string }> {
-    const anonId = getAnonymousId();
-    const res = await fetch("/api/reports", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        anonymous_id: anonId,
-        ...data,
-      }),
-    });
-    if (!res.ok) throw new Error("Failed to submit report");
-    return res.json();
-  },
-
-  async getAdminReports(secret: string) {
-    const res = await fetch("/api/admin/reports", {
-      headers: { "x-admin-secret": secret },
-    });
-    if (!res.ok) throw new Error("Unauthorized or failed to load reports");
-    return res.json();
-  },
-
-  async adminAction(secret: string, payload: Record<string, unknown>) {
-    const res = await fetch("/api/admin/action", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-secret": secret,
-      },
-      body: JSON.stringify(payload),
-    });
-    if (!res.ok) throw new Error("Admin action failed");
-    return res.json();
-  },
 };

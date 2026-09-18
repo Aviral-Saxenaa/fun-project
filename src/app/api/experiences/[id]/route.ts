@@ -6,17 +6,16 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
-  const exp = db.getExperienceById(id);
-  if (!exp || exp.status === "deleted") {
+  const exp = await db.getExperienceById(id);
+  if (!exp) {
     return NextResponse.json({ detail: "Experience not found" }, { status: 404 });
   }
 
   const { searchParams } = new URL(request.url);
   const anonymousId = searchParams.get("anonymous_id") || undefined;
-  const list = db.getExperiences(exp.company_id, undefined, anonymousId, 100, 0);
-  const found = list.find((e) => e.id === id);
+  const detailed = await db.getExperienceById(id, anonymousId);
 
-  return NextResponse.json(found || exp);
+  return NextResponse.json(detailed || exp);
 }
 
 export async function DELETE(
@@ -32,7 +31,7 @@ export async function DELETE(
     return NextResponse.json({ detail: "Unauthorized" }, { status: 403 });
   }
 
-  const success = db.deleteExperience(id);
+  const success = await db.deleteExperience(id);
   if (!success) {
     return NextResponse.json({ detail: "Not found" }, { status: 404 });
   }

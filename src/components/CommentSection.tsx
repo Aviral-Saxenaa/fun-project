@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Comment } from "@/types";
 import { api } from "@/lib/api";
 import { generatePseudonym } from "@/lib/client/anonymous";
-import { ThumbsUp, ThumbsDown, Flag, Send, Loader2 } from "lucide-react";
-import { ReportModal } from "./ReportModal";
+import { ThumbsUp, ThumbsDown, Send, Loader2 } from "lucide-react";
 
 interface CommentSectionProps {
   experienceId: string;
@@ -18,9 +17,6 @@ export function CommentSection({ experienceId }: CommentSectionProps) {
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Report modal state
-  const [reportingCommentId, setReportingCommentId] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -158,18 +154,9 @@ export function CommentSection({ experienceId }: CommentSectionProps) {
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
                   <span className="font-semibold text-purple-300/90">{pseudonym}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-zinc-500">
-                      {new Date(comm.created_at).toLocaleDateString()}
-                    </span>
-                    <button
-                      onClick={() => setReportingCommentId(comm.id)}
-                      className="opacity-0 group-hover/comment:opacity-100 text-zinc-500 hover:text-rose-400 transition-opacity p-0.5"
-                      title="Report comment"
-                    >
-                      <Flag className="w-3 h-3" />
-                    </button>
-                  </div>
+                  <span className="text-zinc-500">
+                    {new Date(comm.created_at).toLocaleDateString()}
+                  </span>
                 </div>
 
                 <p className="text-zinc-300 leading-relaxed">{comm.content}</p>
@@ -202,15 +189,6 @@ export function CommentSection({ experienceId }: CommentSectionProps) {
             );
           })}
         </div>
-      )}
-
-      {reportingCommentId && (
-        <ReportModal
-          isOpen={Boolean(reportingCommentId)}
-          onClose={() => setReportingCommentId(null)}
-          commentId={reportingCommentId}
-          itemDescription={comments.find((c) => c.id === reportingCommentId)?.content}
-        />
       )}
     </div>
   );

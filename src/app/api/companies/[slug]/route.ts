@@ -6,7 +6,7 @@ export async function GET(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const detail = db.getCompanyDetail(slug);
+  const detail = await db.getCompanyDetail(slug);
 
   if (!detail) {
     return NextResponse.json(

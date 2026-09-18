@@ -16,7 +16,7 @@ export async function POST(
     }
 
     const voteType = body.vote_type === "down" ? "down" : "up";
-    const counts = db.voteComment(id, body.anonymous_id, voteType);
+    const counts = await db.voteComment(id, body.anonymous_id, voteType);
     return NextResponse.json(counts);
   } catch {
     return NextResponse.json(

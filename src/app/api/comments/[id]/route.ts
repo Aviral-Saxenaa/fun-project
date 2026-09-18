@@ -8,13 +8,13 @@ export async function DELETE(
   const { id } = await context.params;
   const { searchParams } = new URL(request.url);
   const adminSecret = searchParams.get("admin_secret");
-  const expectedSecret = process.env.ADMIN_SECRET || "admin-secret";
+  const expectedSecret = process.env.ADMIN_SECRET || "ghostbuster";
 
   if (adminSecret !== expectedSecret) {
     return NextResponse.json({ detail: "Unauthorized" }, { status: 403 });
   }
 
-  const success = db.deleteComment(id);
+  const success = await db.deleteComment(id);
   if (!success) {
     return NextResponse.json({ detail: "Not found" }, { status: 404 });
   }

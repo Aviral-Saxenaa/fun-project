@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   const limit = limitParam ? Math.min(100, Math.max(1, parseInt(limitParam))) : 20;
   const offset = offsetParam ? Math.max(0, parseInt(offsetParam)) : 0;
 
-  const experiences = db.getExperiences(companyId, category, anonymousId, limit, offset);
+  const experiences = await db.getExperiences(companyId, category, anonymousId, limit, offset);
   return NextResponse.json(experiences);
 }
 
@@ -26,15 +26,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check banned
-    if (db.isBanned(body.anonymous_id)) {
-      return NextResponse.json(
-        { detail: "Your anonymous ID has been restricted due to community guideline violations." },
-        { status: 403 }
-      );
-    }
-
-    // Check rate limit
+    // Anti-spam check
     if (!db.checkRateLimit(body.anonymous_id, "story")) {
       return NextResponse.json(
         { detail: "Rate limit reached (max 10 stories per day). Take a breather!" },
@@ -42,16 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check content safety
-    const safety = db.validateContentSafety(body.content);
-    if (!safety.safe) {
-      return NextResponse.json(
-        { detail: safety.reason || "Content flagged by moderation." },
-        { status: 400 }
-      );
-    }
-
-    const exp = db.createExperience({
+    const exp = await db.createExperience({
       company_id: body.company_id,
       anonymous_id: body.anonymous_id,
       interview_stage: body.interview_stage || "Applied",

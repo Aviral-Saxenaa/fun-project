@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Trophy, Plus, ShieldAlert, Sparkles, Menu, X } from "lucide-react";
+import { Trophy, Plus, Sparkles, Menu, X } from "lucide-react";
 import { AddCompanyModal } from "./AddCompanyModal";
 
 export function Navbar() {
@@ -50,15 +50,6 @@ export function Navbar() {
               <Sparkles className="w-4 h-4 text-purple-400" />
               <span>Add Company</span>
             </button>
-
-            <Link
-              id="nav-admin-link"
-              href="/admin"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
-            >
-              <ShieldAlert className="w-4 h-4 text-zinc-500" />
-              <span>Moderation</span>
-            </Link>
           </nav>
 
           {/* Action CTAs */}
@@ -123,14 +114,6 @@ export function Navbar() {
             >
               <Plus className="w-4 h-4" />
               <span>Submit Experience</span>
-            </Link>
-            <Link
-              href="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-zinc-400 hover:bg-zinc-900"
-            >
-              <ShieldAlert className="w-4 h-4 text-zinc-500" />
-              <span>Admin Moderation</span>
             </Link>
           </div>
         )}

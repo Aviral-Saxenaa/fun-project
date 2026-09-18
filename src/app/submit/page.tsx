@@ -114,7 +114,7 @@ function SubmitFormContent() {
     setPolishing(true);
     setAiNote(null);
     try {
-      const res = await fetch("/api/gemini/civilize", {
+      const res = await fetch("/api/grok/civilize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

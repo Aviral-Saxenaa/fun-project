@@ -14,7 +14,7 @@ export async function GET(
   const limit = limitParam ? Math.min(200, Math.max(1, parseInt(limitParam))) : 50;
   const offset = offsetParam ? Math.max(0, parseInt(offsetParam)) : 0;
 
-  const comments = db.getComments(id, anonymousId, limit, offset);
+  const comments = await db.getComments(id, anonymousId, limit, offset);
   return NextResponse.json(comments);
 }
 
@@ -32,13 +32,6 @@ export async function POST(
       );
     }
 
-    if (db.isBanned(body.anonymous_id)) {
-      return NextResponse.json(
-        { detail: "Your anonymous identifier has been suspended." },
-        { status: 403 }
-      );
-    }
-
     if (!db.checkRateLimit(body.anonymous_id, "comment")) {
       return NextResponse.json(
         { detail: "Too many comments! Rate limit is 30/hour. Please wait a bit." },
@@ -46,15 +39,7 @@ export async function POST(
       );
     }
 
-    const safety = db.validateContentSafety(body.content);
-    if (!safety.safe) {
-      return NextResponse.json(
-        { detail: safety.reason || "Content flagged by moderation." },
-        { status: 400 }
-      );
-    }
-
-    const comment = db.addComment(id, body.anonymous_id, body.content.trim());
+    const comment = await db.addComment(id, body.anonymous_id, body.content.trim());
     return NextResponse.json({
       id: comment.id,
       experience_id: comment.experience_id,

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Trophy, ShieldCheck, Flag } from "lucide-react";
+import { Trophy } from "lucide-react";
 
 export function Footer() {
   return (
@@ -44,15 +44,6 @@ export function Footer() {
                   <span>👻 Share Your Experience</span>
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/admin"
-                  className="hover:text-purple-300 flex items-center gap-1.5 transition-colors"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-                  <span>Content Moderation &amp; Admin</span>
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -67,10 +58,6 @@ export function Footer() {
               </p>
               <p className="leading-relaxed">
                 Candidate experiences are shared anonymously using client-side device hashes. No personal profiles are ever created or tracked.
-              </p>
-              <p className="text-[11px] text-zinc-500 pt-1 flex items-center gap-1">
-                <Flag className="w-3 h-3 text-zinc-500" />
-                Moderated community. Doxxing and personal data strictly removed.
               </p>
             </div>
           </div>
