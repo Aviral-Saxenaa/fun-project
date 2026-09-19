@@ -44,19 +44,19 @@ export function MemeTicker() {
   return (
     <div
       id="ghost-meme-banner"
-      className="relative max-w-3xl mx-auto px-4 py-3 sm:py-3.5 bg-gradient-to-r from-purple-950/40 via-zinc-900/80 to-purple-950/40 border border-purple-500/25 rounded-2xl shadow-xl backdrop-blur-md flex items-center justify-between gap-3 group"
+      className="relative w-full max-w-3xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 bg-gradient-to-r from-purple-950/40 via-zinc-900/80 to-purple-950/40 border border-purple-500/25 rounded-2xl shadow-xl backdrop-blur-md flex items-center justify-between gap-2 sm:gap-3 group overflow-hidden"
     >
-      <div className="flex items-center gap-2.5 overflow-hidden">
+      <div className="flex items-center gap-2 sm:gap-2.5 overflow-hidden flex-1 min-w-0">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-500/20 text-purple-300">
           <Flame className="w-4 h-4 text-amber-400 animate-pulse" />
         </span>
 
-        <div className="flex items-center gap-2 overflow-hidden">
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden flex-1 min-w-0">
           <span className="text-xs font-bold uppercase tracking-wider text-purple-400 shrink-0 hidden sm:inline">
             Savage Reality:
           </span>
           <p
-            className={`text-sm sm:text-base font-medium text-zinc-100 truncate transition-opacity duration-300 ${
+            className={`text-xs sm:text-base font-medium text-zinc-100 truncate flex-1 min-w-0 transition-opacity duration-300 ${
               fade ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
             }`}
           >
@@ -69,7 +69,7 @@ export function MemeTicker() {
         id="next-meme-btn"
         onClick={handleNext}
         title="Get another dose of candidate copium"
-        className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-zinc-300 hover:text-purple-300 hover:bg-purple-950/40 transition-colors border border-zinc-800 hover:border-purple-800/40"
+        className="shrink-0 flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-zinc-300 hover:text-purple-300 hover:bg-purple-950/40 transition-colors border border-zinc-800 hover:border-purple-800/40"
       >
         <RefreshCw className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
         <span className="hidden sm:inline">Next Meme</span>

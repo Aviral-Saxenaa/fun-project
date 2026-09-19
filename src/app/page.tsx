@@ -96,24 +96,24 @@ export default function HomePage() {
   }, [selectedCategory]);
 
   return (
-    <div className="space-y-8 sm:space-y-12 pb-20">
+    <div className="space-y-8 sm:space-y-12 pb-20 w-full max-w-full overflow-x-clip">
       {/* Hero Section: Left Text + Right 3D Ghost (High-Impact Above-the-Fold 1st Impression) */}
-      <section className="relative pt-4 sm:pt-8 md:pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="relative pt-4 sm:pt-8 md:pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
         {/* Ambient Glow */}
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36rem] h-[36rem] bg-purple-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
           {/* LEFT COLUMN: All Core Messaging, Punchline, Search Bar & Quick CTAs */}
-          <div className="lg:col-span-7 text-left space-y-4 sm:space-y-5">
+          <div className="lg:col-span-7 text-left space-y-4 sm:space-y-5 min-w-0">
             {/* Tag Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-[11px] sm:text-xs font-mono text-zinc-300 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-              <span>THE CORPORATE TRANSLATION ENGINE</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-zinc-700/80 text-[11px] sm:text-xs font-mono text-zinc-300 shadow-sm max-w-full">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
+              <span className="truncate">THE CORPORATE TRANSLATION ENGINE</span>
             </div>
 
             {/* Headline: Exactly Line 1 "Your application will be", Line 2 "reviewed ignored." */}
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
-              <span className="block text-zinc-100 whitespace-nowrap">Your application will be</span>
+            <h1 className="text-2xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-[1.15] break-words">
+              <span className="block text-zinc-100 sm:whitespace-nowrap">Your application will be</span>
               <span className="block mt-1">
                 <span className="line-through decoration-zinc-500/80 decoration-4 sm:decoration-[6px] text-zinc-400 mr-2 sm:mr-3">
                   reviewed
@@ -125,12 +125,12 @@ export default function HomePage() {
             </h1>
 
             {/* Sarcastic Subtitle */}
-            <p className="text-base sm:text-xl font-extrabold text-purple-300 leading-snug">
+            <p className="text-sm sm:text-xl font-extrabold text-purple-300 leading-snug break-words">
               &ldquo;We will get back to you by EOD&rdquo;{" "}
               <span className="text-zinc-400 font-normal line-through decoration-red-500 decoration-2">
                 (Never)
               </span>{" "}
-              <span className="text-amber-400 font-black">GHOSTED 👻</span>
+              <span className="text-amber-400 font-black inline-block">GHOSTED 👻</span>
             </p>
 
             <p className="text-xs sm:text-sm text-zinc-400">
@@ -138,39 +138,39 @@ export default function HomePage() {
             </p>
 
             {/* Meme Ticker: Catchy Quotes */}
-            <div className="w-full">
+            <div className="w-full min-w-0">
               <MemeTicker />
             </div>
 
             {/* Search Bar */}
-            <div className="pt-1">
+            <div className="pt-1 w-full min-w-0">
               <SearchBar size="large" />
             </div>
 
             {/* Hero Quick Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 pt-1">
               <Link
                 id="hero-leaderboard-btn"
                 href="/leaderboard"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-zinc-900 border border-zinc-700 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-600 shadow-md transition-all"
+                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-zinc-900 border border-zinc-700 text-zinc-100 hover:bg-zinc-800 hover:border-zinc-600 shadow-md transition-all whitespace-nowrap"
               >
-                <Trophy className="w-4 h-4 text-amber-400" />
+                <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
                 <span>🏆 Ghost Leaderboard</span>
               </Link>
 
               <Link
                 id="hero-submit-btn"
                 href="/submit"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/60 transition-all hover:scale-[1.02]"
+                className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-lg shadow-purple-950/60 transition-all hover:scale-[1.02] whitespace-nowrap"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-4 h-4 shrink-0" />
                 <span>Got Ghosted? Tell Us</span>
               </Link>
             </div>
           </div>
 
           {/* RIGHT COLUMN: 3D Interactive Ghost Mascot Canvas */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center relative min-w-0">
             <div className="relative w-full max-w-sm sm:max-w-md h-64 sm:h-80 md:h-96 flex flex-col items-center justify-center rounded-3xl bg-radial from-purple-950/30 via-transparent to-transparent">
               <GhostThreeCanvas />
               <div className="absolute bottom-1 text-[11px] font-mono text-purple-300/70 pointer-events-none select-none text-center bg-zinc-950/60 px-3 py-0.5 rounded-full border border-purple-500/20 backdrop-blur-sm">
@@ -182,7 +182,7 @@ export default function HomePage() {
       </section>
 
       {/* Dynamic Community Statistics Bar */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full overflow-hidden">
         <div className="bg-zinc-900/70 border border-zinc-800/90 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-zinc-800/80">
             {/* Stat 1 */}
@@ -240,14 +240,14 @@ export default function HomePage() {
       <DoomsdayClock />
 
       {/* Main Section: Twitter/X Style Two-Column Layout (Left: Experiences Feed, Right: Sticky Leaderboard) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* LEFT COLUMN: Candidate Experiences Feed (lg:col-span-8) */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-6 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5">
+                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2.5 flex-wrap">
                   <span>Candidate Experiences</span>
                   <span className="text-xs font-mono font-bold text-purple-300 bg-purple-950/60 px-3 py-1 rounded-full border border-purple-800/60">
                     100% Anonymous
@@ -260,7 +260,7 @@ export default function HomePage() {
 
               <Link
                 href="/submit"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-md self-start sm:self-auto transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-purple-600 hover:bg-purple-500 text-white shadow-md self-start sm:self-auto transition-all shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 <span>Submit Your Story</span>
@@ -268,7 +268,7 @@ export default function HomePage() {
             </div>
 
             {/* Category Filter Pills (includes Layoff Shock, triggers meme reaction) */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none max-w-full w-full">
               <span className="text-sm text-zinc-400 flex items-center gap-1.5 pr-1 shrink-0 font-medium">
                 <Filter className="w-4 h-4 text-purple-400" /> Filter:
               </span>

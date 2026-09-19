@@ -12,20 +12,20 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-3 sm:gap-4 flex-nowrap">
+        <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 flex-nowrap overflow-hidden sm:overflow-visible">
           {/* Brand Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 sm:gap-3 group focus:outline-none shrink-0"
+            className="flex items-center gap-2 sm:gap-3 group focus:outline-none shrink-0"
           >
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-xl sm:text-2xl shadow-lg shadow-purple-950/50 group-hover:scale-105 group-hover:border-purple-400 transition-all duration-200 shrink-0">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-lg sm:text-2xl shadow-lg shadow-purple-950/50 group-hover:scale-105 group-hover:border-purple-400 transition-all duration-200 shrink-0">
               👻
             </div>
             <div className="flex flex-col justify-center shrink-0">
-              <span className="font-black text-xl sm:text-2xl tracking-tight text-white group-hover:text-purple-300 transition-colors leading-tight whitespace-nowrap">
+              <span className="font-black text-lg sm:text-2xl tracking-tight text-white group-hover:text-purple-300 transition-colors leading-tight whitespace-nowrap">
                 GHOSTED
               </span>
-              <span className="text-[11px] sm:text-xs text-zinc-400 font-mono tracking-tight line-through decoration-rose-500/90 decoration-2 whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs text-zinc-400 font-mono tracking-tight line-through decoration-rose-500/90 decoration-2 whitespace-nowrap">
                 &ldquo;we will get back to you&rdquo;
               </span>
             </div>
@@ -79,18 +79,18 @@ export function Navbar() {
           </div>
 
           {/* Mobile Menu Button - Single Line Strict */}
-          <div className="flex md:hidden items-center gap-2 shrink-0 flex-nowrap">
+          <div className="flex md:hidden items-center gap-1.5 shrink-0 flex-nowrap">
             <Link
               href="/submit"
-              className="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-purple-600 text-white whitespace-nowrap shrink-0"
+              className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-purple-600 text-white whitespace-nowrap shrink-0"
             >
               Post Story
             </Link>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-900"
+              className="p-1.5 rounded-xl text-zinc-300 hover:text-white hover:bg-zinc-900 shrink-0"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
